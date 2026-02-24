@@ -1,168 +1,254 @@
 <template>
-  <div class="container">
-    <div class="header">
-      <h1>套组编辑器</h1>
-      <router-link to="/" class="button">返回首页</router-link>
+  <div class="editor-layout">
+    <!-- Top Bar: Global Controls -->
+    <div class="top-bar">
+      <button class="back-btn" @click="goBack">← 返回</button>
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      <button class="save-btn primary" @click="saveSet">💾 保存</button>
     </div>
-    
-    <div v-if="loading" id="loading">加载中...</div>
-    <div v-if="error" class="error">{{ error }}</div>
-    
-    <div v-if="!loading && !error && setData" id="editor-content">
-      <!-- Basic Information -->
-      <div class="section">
-        <h2>基本信息</h2>
-        <div class="form-group">
-          <label>套组代码:</label>
-          <input type="text" v-model="setData.set_code" readonly>
-        </div>
-        <div class="form-group">
-          <label>套组名称:</label>
-          <input type="text" v-model="setData.name" placeholder="输入套组名称">
-        </div>
-        <div class="form-group">
-          <label>描述:</label>
-          <textarea v-model="setData.description" rows="3" placeholder="输入描述"></textarea>
-        </div>
-        <div class="form-group">
-          <label>备注:</label>
-          <textarea v-model="setData.notes" rows="3" placeholder="输入备注"></textarea>
+
+    <div v-if="loading" class="loading-overlay">加载中...</div>
+    <div v-if="error" class="error-message">{{ error }}</div>
+
+    <div v-if="!loading && !error && setData" class="main-content">
+      <!-- Left Panel: Navigation & Directory -->
+      <div class="left-panel">
+        <div class="nav-tabs">
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'basic' }"
+            @click="activeTab = 'basic'"
+          >
+            📋 基础信息
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'effects' }"
+            @click="activeTab = 'effects'"
+          >
+            ✨ 局部效果库
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'fixed-terms' }"
+            @click="activeTab = 'fixed-terms'"
+          >
+            📌 局部固词库
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'forms' }"
+            @click="activeTab = 'forms'"
+          >
+            👤 形态
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'summons' }"
+            @click="activeTab = 'summons'"
+          >
+            🐾 召唤物
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'buildings' }"
+            @click="activeTab = 'buildings'"
+          >
+            🏰 建筑
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'attacks' }"
+            @click="activeTab = 'attacks'"
+          >
+            ⚔️ 攻击
+          </button>
+          <button
+            class="nav-tab"
+            :class="{ active: activeTab === 'strategies' }"
+            @click="activeTab = 'strategies'"
+          >
+            🎯 策略
+          </button>
         </div>
       </div>
-      
-      <!-- Design Information -->
-      <div class="section">
-        <h2>设计信息</h2>
-        <div class="form-group">
-          <label>原型 (多个用逗号分隔):</label>
-          <input type="text" v-model="archetypesStr" placeholder="例如: 原型1, 原型2">
-        </div>
-        <div class="form-group">
-          <label>设计师 (多个用逗号分隔):</label>
-          <input type="text" v-model="designersStr" placeholder="例如: 设计师1, 设计师2">
-        </div>
-      </div>
-      
-      <!-- Local Effects Library -->
-      <div class="section">
-        <h2>局部效果库</h2>
-        <div id="effects-editor">
-          <p v-if="Object.keys(setData.effects || {}).length === 0">暂无局部效果</p>
-          <div v-for="(effect, id) in setData.effects" :key="id" class="effect-item">
-            <div class="item-header">
-              <h4>{{ effect.name }} ({{ id }})</h4>
-              <button class="delete-btn" @click="deleteEffect(id)">删除</button>
-            </div>
-            <p>性质: {{ alignmentTranslation[effect.alignment] || effect.alignment }}</p>
-            <p>备注: {{ effect.note || '无' }}</p>
+
+      <!-- Center Panel: Core Editing Area -->
+      <div class="center-panel">
+        <!-- Basic Information Tab -->
+        <div v-if="activeTab === 'basic'" class="edit-section">
+          <h2>基本信息</h2>
+          <div class="form-group">
+            <label>套组代码:</label>
+            <input type="text" v-model="setData.set_code" readonly>
+          </div>
+          <div class="form-group">
+            <label>套组名称:</label>
+            <input type="text" v-model="setData.name" placeholder="输入套组名称">
+          </div>
+          <div class="form-group">
+            <label>描述:</label>
+            <textarea v-model="setData.description" rows="3" placeholder="输入描述"></textarea>
+          </div>
+          <div class="form-group">
+            <label>备注:</label>
+            <textarea v-model="setData.notes" rows="3" placeholder="输入备注"></textarea>
+          </div>
+          
+          <h3>设计信息</h3>
+          <div class="form-group">
+            <label>原型 (多个用逗号分隔):</label>
+            <input type="text" v-model="archetypesStr" placeholder="例如: 原型1, 原型2">
+          </div>
+          <div class="form-group">
+            <label>设计师 (多个用逗号分隔):</label>
+            <input type="text" v-model="designersStr" placeholder="例如: 设计师1, 设计师2">
           </div>
         </div>
-        <button @click="addEffect">添加效果</button>
-      </div>
-      
-      <!-- Local Fixed Terms Library -->
-      <div class="section">
-        <h2>局部固词库</h2>
-        <div id="fixed-terms-editor">
-          <p v-if="Object.keys(setData.fixed_terms || {}).length === 0">暂无局部固词</p>
-          <div v-for="(term, id) in setData.fixed_terms" :key="id" class="term-item">
-            <div class="item-header">
-              <h4>{{ term.name }} ({{ id }})</h4>
-              <button class="delete-btn" @click="deleteFixedTerm(id)">删除</button>
-            </div>
-            <p>备注: {{ term.note || '无' }}</p>
-          </div>
-        </div>
-        <button @click="addFixedTerm">添加固词</button>
-      </div>
-      
-      <!-- Forms -->
-      <div class="section">
-        <h2>形态</h2>
-        <div id="forms-editor">
-          <p v-if="!setData.forms || setData.forms.length === 0">暂无形态</p>
-          <div v-for="(form, index) in setData.forms" :key="index" class="form-item">
-            <div class="item-header">
-              <h4>形态: {{ form.name }} ({{ form.id }})</h4>
-              <button v-if="form.id !== 'default'" class="delete-btn" @click="deleteForm(index)">删除</button>
-            </div>
-            <p>阶段数: {{ form.stages.length }}</p>
-          </div>
-        </div>
-        <button @click="addForm">添加形态</button>
-      </div>
-      
-      <!-- Summons -->
-      <div class="section">
-        <h2>召唤物</h2>
-        <div id="summons-editor">
-          <p v-if="!setData.summons || setData.summons.length === 0">暂无召唤物</p>
-          <div v-for="(summon, index) in setData.summons" :key="index" class="summon-item">
-            <div class="item-header">
-              <h4>{{ summon.name }} ({{ summon.id }})</h4>
-              <button class="delete-btn" @click="deleteSummon(index)">删除</button>
+
+        <!-- Effects Tab -->
+        <div v-if="activeTab === 'effects'" class="edit-section">
+          <h2>局部效果库</h2>
+          <div class="items-list">
+            <p v-if="Object.keys(setData.effects || {}).length === 0" class="empty-hint">暂无局部效果</p>
+            <div v-for="(effect, id) in setData.effects" :key="id" class="card-item">
+              <div class="card-header">
+                <h4>{{ effect.name }} <span class="id-badge">({{ id }})</span></h4>
+                <button class="delete-btn" @click="deleteEffect(id)">🗑️ 删除</button>
+              </div>
+              <div class="card-content">
+                <p><strong>性质:</strong> {{ alignmentTranslation[effect.alignment] || effect.alignment }}</p>
+                <p><strong>备注:</strong> {{ effect.note || '无' }}</p>
+              </div>
             </div>
           </div>
+          <button class="add-btn" @click="addEffect">➕ 添加效果</button>
         </div>
-        <button @click="addSummon">添加召唤物</button>
-      </div>
-      
-      <!-- Buildings -->
-      <div class="section">
-        <h2>建筑</h2>
-        <div id="buildings-editor">
-          <p v-if="!setData.buildings || setData.buildings.length === 0">暂无建筑</p>
-          <div v-for="(building, index) in setData.buildings" :key="index" class="building-item">
-            <div class="item-header">
-              <h4>{{ building.name }} ({{ building.id }})</h4>
-              <button class="delete-btn" @click="deleteBuilding(index)">删除</button>
+
+        <!-- Fixed Terms Tab -->
+        <div v-if="activeTab === 'fixed-terms'" class="edit-section">
+          <h2>局部固词库</h2>
+          <div class="items-list">
+            <p v-if="Object.keys(setData.fixed_terms || {}).length === 0" class="empty-hint">暂无局部固词</p>
+            <div v-for="(term, id) in setData.fixed_terms" :key="id" class="card-item">
+              <div class="card-header">
+                <h4>{{ term.name }} <span class="id-badge">({{ id }})</span></h4>
+                <button class="delete-btn" @click="deleteFixedTerm(id)">🗑️ 删除</button>
+              </div>
+              <div class="card-content">
+                <p><strong>备注:</strong> {{ term.note || '无' }}</p>
+              </div>
             </div>
           </div>
+          <button class="add-btn" @click="addFixedTerm">➕ 添加固词</button>
         </div>
-        <button @click="addBuilding">添加建筑</button>
-      </div>
-      
-      <!-- Attacks -->
-      <div class="section">
-        <h2>攻击</h2>
-        <div id="attacks-editor">
-          <p v-if="!setData.attacks || setData.attacks.length === 0">暂无攻击</p>
-          <div v-for="(attack, index) in setData.attacks" :key="index" class="attack-item">
-            <div class="item-header">
-              <h4>{{ attack.name }} ({{ attack.id }})</h4>
-              <button class="delete-btn" @click="deleteAttack(index)">删除</button>
+
+        <!-- Forms Tab -->
+        <div v-if="activeTab === 'forms'" class="edit-section">
+          <h2>形态</h2>
+          <div class="items-list">
+            <p v-if="!setData.forms || setData.forms.length === 0" class="empty-hint">暂无形态</p>
+            <div v-for="(form, index) in setData.forms" :key="index" class="card-item">
+              <div class="card-header">
+                <h4>{{ form.name }} <span class="id-badge">({{ form.id }})</span></h4>
+                <button v-if="form.id !== 'default'" class="delete-btn" @click="deleteForm(index)">🗑️ 删除</button>
+              </div>
+              <div class="card-content">
+                <p><strong>阶段数:</strong> {{ form.stages.length }}</p>
+              </div>
             </div>
           </div>
+          <button class="add-btn" @click="addForm">➕ 添加形态</button>
         </div>
-        <button @click="addAttack">添加攻击</button>
-      </div>
-      
-      <!-- Strategies -->
-      <div class="section">
-        <h2>策略</h2>
-        <div id="strategies-editor">
-          <p v-if="!setData.strategies || setData.strategies.length === 0">暂无策略</p>
-          <div v-for="(strategy, index) in setData.strategies" :key="index" class="strategy-item">
-            <div class="item-header">
-              <h4>{{ strategy.name }} ({{ strategy.id }})</h4>
-              <button class="delete-btn" @click="deleteStrategy(index)">删除</button>
+
+        <!-- Summons Tab -->
+        <div v-if="activeTab === 'summons'" class="edit-section">
+          <h2>召唤物</h2>
+          <div class="items-list">
+            <p v-if="!setData.summons || setData.summons.length === 0" class="empty-hint">暂无召唤物</p>
+            <div v-for="(summon, index) in setData.summons" :key="index" class="card-item">
+              <div class="card-header">
+                <h4>{{ summon.name }} <span class="id-badge">({{ summon.id }})</span></h4>
+                <button class="delete-btn" @click="deleteSummon(index)">🗑️ 删除</button>
+              </div>
             </div>
           </div>
+          <button class="add-btn" @click="addSummon">➕ 添加召唤物</button>
         </div>
-        <button @click="addStrategy">添加策略</button>
+
+        <!-- Buildings Tab -->
+        <div v-if="activeTab === 'buildings'" class="edit-section">
+          <h2>建筑</h2>
+          <div class="items-list">
+            <p v-if="!setData.buildings || setData.buildings.length === 0" class="empty-hint">暂无建筑</p>
+            <div v-for="(building, index) in setData.buildings" :key="index" class="card-item">
+              <div class="card-header">
+                <h4>{{ building.name }} <span class="id-badge">({{ building.id }})</span></h4>
+                <button class="delete-btn" @click="deleteBuilding(index)">🗑️ 删除</button>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" @click="addBuilding">➕ 添加建筑</button>
+        </div>
+
+        <!-- Attacks Tab -->
+        <div v-if="activeTab === 'attacks'" class="edit-section">
+          <h2>攻击</h2>
+          <div class="items-list">
+            <p v-if="!setData.attacks || setData.attacks.length === 0" class="empty-hint">暂无攻击</p>
+            <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item">
+              <div class="card-header">
+                <h4>{{ attack.name }} <span class="id-badge">({{ attack.id }})</span></h4>
+                <button class="delete-btn" @click="deleteAttack(index)">🗑️ 删除</button>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" @click="addAttack">➕ 添加攻击</button>
+        </div>
+
+        <!-- Strategies Tab -->
+        <div v-if="activeTab === 'strategies'" class="edit-section">
+          <h2>策略</h2>
+          <div class="items-list">
+            <p v-if="!setData.strategies || setData.strategies.length === 0" class="empty-hint">暂无策略</p>
+            <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item">
+              <div class="card-header">
+                <h4>{{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span></h4>
+                <button class="delete-btn" @click="deleteStrategy(index)">🗑️ 删除</button>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" @click="addStrategy">➕ 添加策略</button>
+        </div>
       </div>
-      
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button @click="saveSet" class="primary">保存</button>
-        <button @click="deleteCurrentSet" class="danger">删除套组</button>
+
+      <!-- Right Panel: Preview & Effects Display -->
+      <div class="right-panel">
+        <div class="preview-section">
+          <h3>预览区域</h3>
+          <div class="preview-placeholder">
+            <p>🎴 卡片可视化预览</p>
+            <p class="hint">（预览功能待实现）</p>
+          </div>
+          <div class="preview-actions">
+            <button class="btn-icon" title="缩放">🔍</button>
+            <button class="btn-icon" title="下载">💾</button>
+          </div>
+        </div>
+        
+        <div class="effects-display-section">
+          <h3>绑定效果/固词</h3>
+          <div class="effects-list">
+            <p class="hint">当前页面处理的效果和固词描述将显示在这里</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION } from '@/utils/validation'
@@ -178,8 +264,13 @@ const router = useRouter()
 const loading = ref(true)
 const error = ref(null)
 const setData = ref(null)
+const activeTab = ref('basic')
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
+
+const pageTitle = computed(() => {
+  return `套组编辑器 - ${setData.value?.name || props.setCode}`
+})
 
 // Computed properties for array to string conversion
 const archetypesStr = computed({
@@ -210,6 +301,10 @@ async function loadSet() {
     error.value = '加载套组失败'
     loading.value = false
   }
+}
+
+function goBack() {
+  router.push('/')
 }
 
 // Effects management
@@ -458,22 +553,361 @@ async function saveSet() {
   }
 }
 
-async function deleteCurrentSet() {
-  if (!confirm(`确定要删除套组 ${props.setCode} 吗？此操作无法撤销！`)) {
-    return
-  }
-  
-  try {
-    await setAPI.delete(props.setCode)
-    alert('套组已删除')
-    router.push('/')
-  } catch (err) {
-    console.error('Error deleting set:', err)
-    alert('删除套组失败: ' + err.message)
-  }
-}
-
 onMounted(() => {
   loadSet()
 })
 </script>
+
+<style scoped>
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f5f5f5;
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.back-btn, .save-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.save-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Loading & Error */
+.loading-overlay, .error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+/* Main Content */
+.main-content {
+  display: grid;
+  grid-template-columns: 250px 1fr 350px;
+  gap: 0;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+}
+
+/* Left Panel */
+.left-panel {
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.nav-tabs {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.nav-tab {
+  padding: 12px 15px;
+  margin-bottom: 5px;
+  border: none;
+  background: #f5f5f5;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nav-tab:hover {
+  background: #e8e8e8;
+}
+
+.nav-tab.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+}
+
+/* Center Panel */
+.center-panel {
+  background: white;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.edit-section h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+}
+
+.edit-section h3 {
+  color: #34495e;
+  margin: 30px 0 15px;
+  font-size: 18px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input[readonly] {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+/* Items List */
+.items-list {
+  margin-bottom: 20px;
+}
+
+.card-item {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.card-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-header h4 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.id-badge {
+  color: #667eea;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+.card-content p {
+  margin: 5px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-hint {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-style: italic;
+}
+
+.add-btn {
+  padding: 12px 24px;
+  border: 2px dashed #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+  background: #667eea;
+  color: white;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+/* Right Panel */
+.right-panel {
+  background: white;
+  border-left: 1px solid #e0e0e0;
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.preview-section {
+  margin-bottom: 30px;
+}
+
+.preview-section h3,
+.effects-display-section h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+}
+
+.preview-placeholder {
+  background: #f9f9f9;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+  margin-bottom: 15px;
+}
+
+.preview-placeholder p {
+  margin: 5px 0;
+}
+
+.preview-placeholder .hint {
+  font-size: 12px;
+  font-style: italic;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-icon {
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: #f5f5f5;
+  border-color: #667eea;
+}
+
+.effects-display-section {
+  margin-top: 30px;
+}
+
+.effects-list {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 200px;
+}
+
+.effects-list .hint {
+  color: #999;
+  text-align: center;
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .main-content {
+    grid-template-columns: 200px 1fr 300px;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .left-panel {
+    display: none;
+  }
+  
+  .right-panel {
+    display: none;
+  }
+}
+</style>
