@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chessfighteditorv2"
+version = "1.0.0"
+description = "一个用于管理和编辑 ChessFight 游戏套组数据的 Web 应用程序。"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "goldsheep3"}
+]
+keywords = ["chessfight", "editor", "game"]
+
+dependencies = [
+    "Flask>=3.0.0",
+    "pydantic>=2.0.0",
+    "Werkzeug>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/goldsheep3/ChessFightEditorV2"
+Repository = "https://github.com/goldsheep3/ChessFightEditorV2"
+Issues = "https://github.com/goldsheep3/ChessFightEditorV2/issues"
+
+[tool.setuptools]
+packages = ["editor"]

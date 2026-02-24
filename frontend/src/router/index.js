@@ -3,6 +3,7 @@ import Home from '@/views/Home.vue'
 import SetEditor from '@/views/SetEditor.vue'
 import GlobalEffects from '@/views/GlobalEffects.vue'
 import GlobalFixedTerms from '@/views/GlobalFixedTerms.vue'
+import NotFound from '@/views/NotFound.vue'
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     path: '/global/fixed-terms',
     name: 'GlobalFixedTerms',
     component: GlobalFixedTerms
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ]
 
