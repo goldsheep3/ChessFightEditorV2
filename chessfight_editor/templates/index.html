@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessFight 套组编辑器</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ChessFight 套组编辑器 V2</h1>
+        
+        <div class="section">
+            <h2>套组管理</h2>
+            <div id="sets-list"></div>
+            <div class="action-buttons">
+                <button onclick="createNewSet()">创建新套组</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>通用库管理</h2>
+            <div class="action-buttons">
+                <a href="/global/effects" class="button">编辑全局效果库</a>
+                <a href="/global/fixed-terms" class="button">编辑全局固词库</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/validation.js"></script>
+    <script src="/static/index.js"></script>
+</body>
+</html>

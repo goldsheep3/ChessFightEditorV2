@@ -1,0 +1,19 @@
+{
+  "effects": {
+    "burn": {
+      "name": "灼烧",
+      "alignment": "negative",
+      "note": "每回合造成持续伤害"
+    },
+    "shield": {
+      "name": "护盾",
+      "alignment": "positive",
+      "note": "抵挡伤害"
+    },
+    "stun": {
+      "name": "眩晕",
+      "alignment": "negative",
+      "note": "无法行动"
+    }
+  }
+}
