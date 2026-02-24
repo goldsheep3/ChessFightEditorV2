@@ -11,65 +11,188 @@
     <div v-if="error" class="error-message">{{ error }}</div>
 
     <div v-if="!loading && !error && setData" class="main-content">
-      <!-- Left Panel: Navigation & Directory -->
+      <!-- Left Panel: Hierarchical Directory Tree -->
       <div class="left-panel">
-        <div class="nav-tabs">
-          <button
-            class="nav-tab"
+        <div class="tree-nav">
+          <!-- Basic Info -->
+          <div 
+            class="tree-item"
             :class="{ active: activeTab === 'basic' }"
-            @click="activeTab = 'basic'"
+            @click="selectItem('basic')"
           >
-            📋 基础信息
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'effects' }"
-            @click="activeTab = 'effects'"
-          >
-            ✨ 局部效果库
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'fixed-terms' }"
-            @click="activeTab = 'fixed-terms'"
-          >
-            📌 局部固词库
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'forms' }"
-            @click="activeTab = 'forms'"
-          >
-            👤 形态
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'summons' }"
-            @click="activeTab = 'summons'"
-          >
-            🐾 召唤物
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'buildings' }"
-            @click="activeTab = 'buildings'"
-          >
-            🏰 建筑
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'attacks' }"
-            @click="activeTab = 'attacks'"
-          >
-            ⚔️ 攻击
-          </button>
-          <button
-            class="nav-tab"
-            :class="{ active: activeTab === 'strategies' }"
-            @click="activeTab = 'strategies'"
-          >
-            🎯 策略
-          </button>
+            <span class="tree-icon">📋</span>
+            <span class="tree-text">卡牌基本信息</span>
+          </div>
+
+          <!-- Forms Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">👤</span>
+              <span class="tree-text">形态卡</span>
+            </div>
+            <div class="tree-children">
+              <template v-for="(form, index) in setData.forms" :key="form.id">
+                <div 
+                  v-for="stage in form.stages" 
+                  :key="`${form.id}-${stage.stage}`"
+                  class="tree-item child"
+                  :class="{ active: activeTab === 'forms' && selectedItem.id === form.id && selectedItem.stage === stage.stage }"
+                  @click="selectFormStage(form.id, stage.stage)"
+                >
+                  <span class="tree-icon">{{ form.id === 'default' ? '🔷' : '🔹' }}</span>
+                  <span class="tree-text">{{ form.name }} 【{{ toRoman(stage.stage) }}】</span>
+                </div>
+              </template>
+              <div class="tree-item child add-item" @click="addForm">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建形态卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attacks Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">⚔️</span>
+              <span class="tree-text">攻击卡</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(attack, index) in setData.attacks" 
+                :key="attack.id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'attacks' && selectedItem.id === attack.id }"
+                @click="selectItem('attacks', attack.id)"
+              >
+                <span class="tree-icon">⚔️</span>
+                <span class="tree-text">{{ attack.name }}{{ attack.rarity === 'SSR' ? ' 【决策】' : '' }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addAttack">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建攻击卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Strategies Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">🎯</span>
+              <span class="tree-text">策略卡</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(strategy, index) in setData.strategies" 
+                :key="strategy.id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'strategies' && selectedItem.id === strategy.id }"
+                @click="selectItem('strategies', strategy.id)"
+              >
+                <span class="tree-icon">🎯</span>
+                <span class="tree-text">{{ strategy.name }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addStrategy">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建策略卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summons Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">🐾</span>
+              <span class="tree-text">召唤物卡</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(summon, index) in setData.summons" 
+                :key="summon.id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'summons' && selectedItem.id === summon.id }"
+                @click="selectItem('summons', summon.id)"
+              >
+                <span class="tree-icon">🐾</span>
+                <span class="tree-text">{{ summon.name }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addSummon">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建召唤物卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Buildings Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">🏰</span>
+              <span class="tree-text">建筑物卡</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(building, index) in setData.buildings" 
+                :key="building.id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'buildings' && selectedItem.id === building.id }"
+                @click="selectItem('buildings', building.id)"
+              >
+                <span class="tree-icon">🏰</span>
+                <span class="tree-text">{{ building.name }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addBuilding">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建建筑物卡</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local Effects Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">✨</span>
+              <span class="tree-text">特定效果</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(effect, id) in setData.effects" 
+                :key="id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'effects' && selectedItem.id === id }"
+                @click="selectItem('effects', id)"
+              >
+                <span class="tree-icon">✨</span>
+                <span class="tree-text">{{ effect.name }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addEffect">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建特定效果</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local Fixed Terms Section -->
+          <div class="tree-section">
+            <div class="tree-section-header">
+              <span class="tree-icon">📌</span>
+              <span class="tree-text">特定固词</span>
+            </div>
+            <div class="tree-children">
+              <div 
+                v-for="(term, id) in setData.fixed_terms" 
+                :key="id"
+                class="tree-item child"
+                :class="{ active: activeTab === 'fixed-terms' && selectedItem.id === id }"
+                @click="selectItem('fixed-terms', id)"
+              >
+                <span class="tree-icon">📌</span>
+                <span class="tree-text">{{ term.name }}</span>
+              </div>
+              <div class="tree-item child add-item" @click="addFixedTerm">
+                <span class="tree-icon">➕</span>
+                <span class="tree-text">新建特定固词</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -265,6 +388,7 @@ const loading = ref(true)
 const error = ref(null)
 const setData = ref(null)
 const activeTab = ref('basic')
+const selectedItem = ref({ type: 'basic', id: null, stage: null }) // Track selected item in tree
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -305,6 +429,22 @@ async function loadSet() {
 
 function goBack() {
   router.push('/')
+}
+
+// Tree navigation helpers
+function selectItem(type, id = null, stage = null) {
+  activeTab.value = type
+  selectedItem.value = { type, id, stage }
+}
+
+function selectFormStage(formId, stage) {
+  activeTab.value = 'forms'
+  selectedItem.value = { type: 'forms', id: formId, stage }
+}
+
+function toRoman(num) {
+  const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' }
+  return lookup[num] || num
 }
 
 // Effects management
@@ -644,32 +784,87 @@ onMounted(() => {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 }
 
-.nav-tabs {
-  display: flex;
-  flex-direction: column;
+/* Left Panel */
+.left-panel {
+  background: white;
+  border-right: 1px solid #e0e0e0;
+  overflow-y: auto;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
   padding: 10px;
 }
 
-.nav-tab {
-  padding: 12px 15px;
-  margin-bottom: 5px;
-  border: none;
-  background: #f5f5f5;
-  text-align: left;
-  cursor: pointer;
+/* Tree Navigation */
+.tree-nav {
+  padding: 5px;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 3px;
   border-radius: 6px;
-  font-size: 14px;
+  cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 13px;
+  color: #333;
 }
 
-.nav-tab:hover {
-  background: #e8e8e8;
+.tree-item:hover {
+  background: #f5f5f5;
 }
 
-.nav-tab.active {
+.tree-item.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   font-weight: 600;
+}
+
+.tree-item.child {
+  padding-left: 35px;
+  font-size: 12px;
+}
+
+.tree-item.add-item {
+  color: #667eea;
+  font-style: italic;
+}
+
+.tree-item.add-item:hover {
+  background: #f0f0ff;
+}
+
+.tree-icon {
+  margin-right: 8px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tree-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-section {
+  margin-bottom: 5px;
+}
+
+.tree-section-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 3px;
+}
+
+.tree-children {
+  margin-left: 0;
 }
 
 /* Center Panel */

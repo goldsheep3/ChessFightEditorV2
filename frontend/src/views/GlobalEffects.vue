@@ -11,14 +11,20 @@
     <div v-if="error" class="error-message">{{ error }}</div>
 
     <div v-if="!loading && !error" class="main-content">
-      <!-- Left Panel: Navigation -->
+      <!-- Left Panel: Table of Contents -->
       <div class="left-panel">
         <div class="nav-section">
-          <h3>🗂️ 库管理</h3>
-          <div class="nav-item active">
-            <span class="nav-icon">✨</span>
-            <span>全局效果库</span>
+          <h3>📑 目录</h3>
+          <div v-if="Object.keys(effects).length === 0" class="empty-hint">
+            暂无效果
           </div>
+          <div v-for="(effect, id) in effects" :key="id" class="toc-item" @click="scrollToEffect(id)">
+            <span class="toc-icon">✨</span>
+            <span class="toc-text">{{ effect.name }}</span>
+          </div>
+        </div>
+        <div class="nav-section" style="margin-top: 20px;">
+          <h3>🗂️ 库管理</h3>
           <div class="nav-item" @click="$router.push('/global/fixed-terms')">
             <span class="nav-icon">📌</span>
             <span>全局固词库</span>
@@ -43,7 +49,7 @@
         </div>
 
         <div class="effects-list">
-          <div v-for="(effect, id) in effects" :key="id" class="effect-card">
+          <div v-for="(effect, id) in effects" :key="id" :id="`effect-${id}`" class="effect-card">
             <div class="card-header">
               <h4>{{ effect.name }} <span class="id-badge">({{ id }})</span></h4>
               <button class="delete-btn" @click="deleteEffect(id)">🗑️ 删除</button>
@@ -120,6 +126,18 @@ async function loadEffects() {
 
 function goBack() {
   router.push('/')
+}
+
+function scrollToEffect(id) {
+  const element = document.getElementById(`effect-${id}`)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // Briefly highlight the element
+    element.style.boxShadow = '0 0 0 3px rgba(102, 126, 234, 0.5)'
+    setTimeout(() => {
+      element.style.boxShadow = ''
+    }, 1000)
+  }
 }
 
 function addEffect() {
@@ -293,6 +311,49 @@ onMounted(() => {
 .nav-icon {
   margin-right: 10px;
   font-size: 18px;
+}
+
+.nav-icon {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* TOC Items */
+.toc-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #555;
+}
+
+.toc-item:hover {
+  background: #f5f5f5;
+  color: #667eea;
+}
+
+.toc-icon {
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.toc-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-hint {
+  padding: 20px 10px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
 }
 
 /* Center Panel */
