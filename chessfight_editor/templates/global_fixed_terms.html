@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全局固词库编辑器</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>全局固词库编辑器</h1>
+            <a href="/" class="button">返回首页</a>
+        </div>
+        
+        <div id="loading">加载中...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="editor-content" style="display: none;">
+            <div class="section">
+                <h2>全局固词</h2>
+                <div id="terms-list"></div>
+                <button onclick="addTerm()">添加固词</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="saveTerms()" class="primary">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/global_fixed_terms.js"></script>
+</body>
+</html>

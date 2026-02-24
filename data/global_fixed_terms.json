@@ -1,0 +1,12 @@
+{
+  "fixed_terms": {
+    "deploy": {
+      "name": "部署",
+      "note": "放置单位到场上"
+    },
+    "charge": {
+      "name": "冲锋",
+      "note": "本回合立即行动"
+    }
+  }
+}

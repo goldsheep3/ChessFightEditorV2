@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>套组编辑器 - {{ set_code }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>套组编辑器</h1>
+            <a href="/" class="button">返回首页</a>
+        </div>
+        
+        <div id="loading">加载中...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="editor-content" style="display: none;">
+            <div class="section">
+                <h2>基本信息</h2>
+                <div class="form-group">
+                    <label>套组代码:</label>
+                    <input type="text" id="set_code" readonly>
+                </div>
+                <div class="form-group">
+                    <label>套组名称:</label>
+                    <input type="text" id="name" placeholder="输入套组名称">
+                </div>
+                <div class="form-group">
+                    <label>描述:</label>
+                    <textarea id="description" rows="3" placeholder="输入描述"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>备注:</label>
+                    <textarea id="notes" rows="3" placeholder="输入备注"></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>形态 (Forms)</h2>
+                <div id="forms-editor"></div>
+                <button onclick="addForm()">添加形态</button>
+            </div>
+            
+            <div class="section">
+                <h2>局部效果库 (Local Effects)</h2>
+                <div id="effects-editor"></div>
+                <button onclick="addEffect()">添加效果</button>
+            </div>
+            
+            <div class="section">
+                <h2>局部固词库 (Local Fixed Terms)</h2>
+                <div id="fixed-terms-editor"></div>
+                <button onclick="addFixedTerm()">添加固词</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="saveSet()" class="primary">保存套组</button>
+                <button onclick="deleteSet()" class="danger">删除套组</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const SET_CODE = "{{ set_code }}";
+    </script>
+    <script src="/static/editor.js"></script>
+</body>
+</html>
