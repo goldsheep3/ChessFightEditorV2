@@ -1,5 +1,12 @@
 let setData = null;
 
+// Translation map for effect alignment
+const ALIGNMENT_TRANSLATION = {
+    'positive': '正面',
+    'neutral': '中性',
+    'negative': '负面'
+};
+
 // Load set data
 async function loadSet() {
     try {
@@ -66,7 +73,7 @@ function renderEffects() {
                 <h4>${effect.name} (${id})</h4>
                 <button class="delete-btn" onclick="deleteEffect('${id}')">删除</button>
             </div>
-            <p>性质: ${effect.alignment}</p>
+            <p>性质: ${ALIGNMENT_TRANSLATION[effect.alignment] || effect.alignment}</p>
             <p>备注: ${effect.note || '无'}</p>
         </div>
     `).join('');
