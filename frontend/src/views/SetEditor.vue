@@ -20,14 +20,14 @@
             :class="{ active: activeTab === 'basic' }"
             @click="selectItem('basic')"
           >
-            <span class="tree-icon">📋</span>
+            <span class="tree-icon">◆</span>
             <span class="tree-text">卡牌基本信息</span>
           </div>
 
           <!-- Forms Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">👤</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">形态卡</span>
             </div>
             <div class="tree-children">
@@ -39,12 +39,12 @@
                   :class="{ active: activeTab === 'forms' && selectedItem.id === form.id && selectedItem.stage === stage.stage }"
                   @click="selectFormStage(form.id, stage.stage)"
                 >
-                  <span class="tree-icon">{{ form.id === 'default' ? '🔷' : '🔹' }}</span>
+                  <span class="tree-icon">◆</span>
                   <span class="tree-text">{{ form.name }} 【{{ toRoman(stage.stage) }}】</span>
                 </div>
               </template>
               <div class="tree-item child add-item" @click="addForm">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建形态卡</span>
               </div>
             </div>
@@ -53,7 +53,7 @@
           <!-- Attacks Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">⚔️</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">攻击卡</span>
             </div>
             <div class="tree-children">
@@ -64,11 +64,11 @@
                 :class="{ active: activeTab === 'attacks' && selectedItem.id === attack.id }"
                 @click="selectItem('attacks', attack.id)"
               >
-                <span class="tree-icon">⚔️</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ attack.name }}{{ attack.rarity === 'SSR' ? ' 【决策】' : '' }}</span>
               </div>
               <div class="tree-item child add-item" @click="addAttack">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建攻击卡</span>
               </div>
             </div>
@@ -77,7 +77,7 @@
           <!-- Strategies Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">🎯</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">策略卡</span>
             </div>
             <div class="tree-children">
@@ -88,11 +88,11 @@
                 :class="{ active: activeTab === 'strategies' && selectedItem.id === strategy.id }"
                 @click="selectItem('strategies', strategy.id)"
               >
-                <span class="tree-icon">🎯</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ strategy.name }}</span>
               </div>
               <div class="tree-item child add-item" @click="addStrategy">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建策略卡</span>
               </div>
             </div>
@@ -101,7 +101,7 @@
           <!-- Summons Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">🐾</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">召唤物卡</span>
             </div>
             <div class="tree-children">
@@ -112,11 +112,11 @@
                 :class="{ active: activeTab === 'summons' && selectedItem.id === summon.id }"
                 @click="selectItem('summons', summon.id)"
               >
-                <span class="tree-icon">🐾</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ summon.name }}</span>
               </div>
               <div class="tree-item child add-item" @click="addSummon">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建召唤物卡</span>
               </div>
             </div>
@@ -125,7 +125,7 @@
           <!-- Buildings Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">🏰</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">建筑物卡</span>
             </div>
             <div class="tree-children">
@@ -136,11 +136,11 @@
                 :class="{ active: activeTab === 'buildings' && selectedItem.id === building.id }"
                 @click="selectItem('buildings', building.id)"
               >
-                <span class="tree-icon">🏰</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ building.name }}</span>
               </div>
               <div class="tree-item child add-item" @click="addBuilding">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建建筑物卡</span>
               </div>
             </div>
@@ -149,7 +149,7 @@
           <!-- Local Effects Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">✨</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">特定效果</span>
             </div>
             <div class="tree-children">
@@ -160,11 +160,11 @@
                 :class="{ active: activeTab === 'effects' && selectedItem.id === id }"
                 @click="selectItem('effects', id)"
               >
-                <span class="tree-icon">✨</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ effect.name }}</span>
               </div>
               <div class="tree-item child add-item" @click="addEffect">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建特定效果</span>
               </div>
             </div>
@@ -173,7 +173,7 @@
           <!-- Local Fixed Terms Section -->
           <div class="tree-section">
             <div class="tree-section-header">
-              <span class="tree-icon">📌</span>
+              <span class="tree-icon">◆</span>
               <span class="tree-text">特定固词</span>
             </div>
             <div class="tree-children">
@@ -184,11 +184,11 @@
                 :class="{ active: activeTab === 'fixed-terms' && selectedItem.id === id }"
                 @click="selectItem('fixed-terms', id)"
               >
-                <span class="tree-icon">📌</span>
+                <span class="tree-icon">◆</span>
                 <span class="tree-text">{{ term.name }}</span>
               </div>
               <div class="tree-item child add-item" @click="addFixedTerm">
-                <span class="tree-icon">➕</span>
+                <span class="tree-icon">+</span>
                 <span class="tree-text">新建特定固词</span>
               </div>
             </div>
@@ -274,8 +274,8 @@
                 <div v-if="stage.stage === selectedItem.stage">
                   <h2>{{ form.name }} - 【{{ toRoman(stage.stage) }}】阶</h2>
                   
-                  <!-- Stage 2: Can edit name and all properties -->
-                  <template v-if="stage.stage === 2">
+                  <!-- Stage 1 and 2: Can edit name and all properties -->
+                  <template v-if="stage.stage !== 3">
                     <h3>基础信息 (所有阶段共享)</h3>
                     <div class="form-group">
                       <label>形态ID:</label>
@@ -297,16 +297,16 @@
                     <div class="form-group">
                       <label>形态名称:</label>
                       <input type="text" :value="form.name" readonly disabled>
-                      <p class="hint-text">💡 提示：形态名称只能在【II】阶编辑</p>
+                      <p class="hint-text">提示：形态名称只能在【I】或【II】阶编辑</p>
                     </div>
                   </template>
                   
                   <!-- Common fields for all stages, but editable differently -->
                   <h3>【{{ toRoman(stage.stage) }}】阶属性</h3>
                   
-                  <!-- For stage 2: All fields editable -->
+                  <!-- For stage 1 and 2: All fields editable -->
                   <!-- For stage 3: Only text, effects, and fixed terms editable -->
-                  <template v-if="stage.stage === 2">
+                  <template v-if="stage.stage !== 3">
                     <div class="form-row">
                       <div class="form-group">
                         <label>消耗:</label>
@@ -359,7 +359,7 @@
                   <!-- Stage 3: Show read-only stats -->
                   <template v-else>
                     <div class="readonly-section">
-                      <p class="hint-text">💡 提示：以下数值属性只能在【II】阶编辑</p>
+                      <p class="hint-text">提示：以下数值属性只能在【I】或【II】阶编辑</p>
                       <div class="form-row">
                         <div class="form-group">
                           <label>消耗:</label>
