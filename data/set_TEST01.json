@@ -1,54 +1,63 @@
 {
-  "schema_version": 2,
-  "name": "测试套组",
-  "set_code": "TEST01",
-  "description": "这是一个测试套组",
-  "notes": "用于测试的套组",
-  "archetypes": [
-    "战士",
-    "法师"
-  ],
-  "designers": [
-    "测试者"
-  ],
-  "effects": {
-    "test_effect": {
-      "name": "测试效果",
-      "alignment": "positive",
-      "note": "这是一个测试效果"
-    }
-  },
-  "fixed_terms": {
-    "test_term": {
-      "name": "测试固词",
-      "note": "这是一个测试固词"
-    }
-  },
-  "forms": [
-    {
-      "id": "default",
-      "name": "默认形态",
-      "stages": [
-        {
-          "rarity": "R",
-          "image": "",
-          "icon": "",
-          "brast": "",
-          "hp_init": 10,
-          "hp_limit": 10,
-          "text": "基础单位",
-          "bound_effects": [],
-          "bound_fixed_terms": [],
-          "stage": 1,
-          "cost": 3,
-          "move": 2,
-          "atk": 5
+    "set_code": "TEST01",
+    "name": "测试套组",
+    "description": "这是一个测试套组",
+    "notes": "用于测试的套组",
+    "archetypes": ["战士", "法师"],
+    "designers": ["测试者"],
+    "effects": {
+        "test_effect": {
+            "name": "测试效果",
+            "alignment": "positive",
+            "note": "这是一个测试效果"
         }
-      ]
-    }
-  ],
-  "summons": [],
-  "buildings": [],
-  "attacks": [],
-  "strategies": []
+    },
+    "fixed_terms": {
+        "test_term": {
+            "name": "测试固词",
+            "note": "这是一个测试固词"
+        }
+    },
+    "forms": [
+        {
+            "id": "default",
+            "name": "默认形态",
+            "stages": [
+                {
+                    "stage": 2,
+                    "cost": 3,
+                    "move": 2,
+                    "atk": 5,
+                    "hp_init": 10,
+                    "hp_limit": 10,
+                    "rarity": "R",
+                    "image": "",
+                    "icon": "",
+                    "brast": "",
+                    "text": "基础单位 - II阶形态",
+                    "bound_effects": [],
+                    "bound_fixed_terms": []
+                },
+                {
+                    "stage": 3,
+                    "cost": 5,
+                    "move": 3,
+                    "atk": 8,
+                    "hp_init": 15,
+                    "hp_limit": 15,
+                    "rarity": "SR",
+                    "image": "",
+                    "icon": "",
+                    "brast": "",
+                    "text": "基础单位 - III阶进化形态",
+                    "bound_effects": ["test_effect"],
+                    "bound_fixed_terms": ["test_term"]
+                }
+            ]
+        }
+    ],
+    "summons": [],
+    "buildings": [],
+    "attacks": [],
+    "strategies": []
 }

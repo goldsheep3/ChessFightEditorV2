@@ -267,21 +267,174 @@
         </div>
 
         <!-- Forms Tab -->
-        <div v-if="activeTab === 'forms'" class="edit-section">
-          <h2>形态</h2>
-          <div class="items-list">
-            <p v-if="!setData.forms || setData.forms.length === 0" class="empty-hint">暂无形态</p>
-            <div v-for="(form, index) in setData.forms" :key="index" class="card-item">
-              <div class="card-header">
-                <h4>{{ form.name }} <span class="id-badge">({{ form.id }})</span></h4>
-                <button v-if="form.id !== 'default'" class="delete-btn" @click="deleteForm(index)">🗑️ 删除</button>
-              </div>
-              <div class="card-content">
-                <p><strong>阶段数:</strong> {{ form.stages.length }}</p>
-              </div>
-            </div>
-          </div>
-          <button class="add-btn" @click="addForm">➕ 添加形态</button>
+        <div v-if="activeTab === 'forms' && selectedItem.id && selectedItem.stage" class="edit-section">
+          <template v-for="form in setData.forms" :key="form.id">
+            <template v-if="form.id === selectedItem.id">
+              <template v-for="stage in form.stages" :key="`${form.id}-${stage.stage}`">
+                <div v-if="stage.stage === selectedItem.stage">
+                  <h2>{{ form.name }} - 【{{ toRoman(stage.stage) }}】阶</h2>
+                  
+                  <!-- Stage 2: Can edit name and all properties -->
+                  <template v-if="stage.stage === 2">
+                    <h3>基础信息 (所有阶段共享)</h3>
+                    <div class="form-group">
+                      <label>形态ID:</label>
+                      <input type="text" :value="form.id" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>形态名称:</label>
+                      <input type="text" v-model="form.name" placeholder="输入形态名称">
+                    </div>
+                  </template>
+                  
+                  <!-- Stage 3: Cannot edit name (read-only) -->
+                  <template v-else>
+                    <h3>基础信息 (所有阶段共享，不可编辑)</h3>
+                    <div class="form-group">
+                      <label>形态ID:</label>
+                      <input type="text" :value="form.id" readonly>
+                    </div>
+                    <div class="form-group">
+                      <label>形态名称:</label>
+                      <input type="text" :value="form.name" readonly disabled>
+                      <p class="hint-text">💡 提示：形态名称只能在【II】阶编辑</p>
+                    </div>
+                  </template>
+                  
+                  <!-- Common fields for all stages, but editable differently -->
+                  <h3>【{{ toRoman(stage.stage) }}】阶属性</h3>
+                  
+                  <!-- For stage 2: All fields editable -->
+                  <!-- For stage 3: Only text, effects, and fixed terms editable -->
+                  <template v-if="stage.stage === 2">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>消耗:</label>
+                        <input type="number" v-model.number="stage.cost" min="0">
+                      </div>
+                      <div class="form-group">
+                        <label>移动:</label>
+                        <input type="number" v-model.number="stage.move" min="0">
+                      </div>
+                      <div class="form-group">
+                        <label>攻击:</label>
+                        <input type="number" v-model.number="stage.atk" min="0">
+                      </div>
+                    </div>
+                    
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label>初始HP:</label>
+                        <input type="number" v-model.number="stage.hp_init" min="1">
+                      </div>
+                      <div class="form-group">
+                        <label>HP上限:</label>
+                        <input type="number" v-model.number="stage.hp_limit" min="1">
+                      </div>
+                      <div class="form-group">
+                        <label>稀有度:</label>
+                        <select v-model="stage.rarity">
+                          <option value="N">N</option>
+                          <option value="R">R</option>
+                          <option value="SR">SR</option>
+                          <option value="SSR">SSR</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group">
+                      <label>图片URL:</label>
+                      <input type="text" v-model="stage.image" placeholder="图片地址">
+                    </div>
+                    <div class="form-group">
+                      <label>图标URL:</label>
+                      <input type="text" v-model="stage.icon" placeholder="图标地址">
+                    </div>
+                    <div class="form-group">
+                      <label>爆裂值:</label>
+                      <input type="text" v-model="stage.brast" placeholder="爆裂值">
+                    </div>
+                  </template>
+                  
+                  <!-- Stage 3: Show read-only stats -->
+                  <template v-else>
+                    <div class="readonly-section">
+                      <p class="hint-text">💡 提示：以下数值属性只能在【II】阶编辑</p>
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label>消耗:</label>
+                          <input type="number" :value="stage.cost" readonly disabled>
+                        </div>
+                        <div class="form-group">
+                          <label>移动:</label>
+                          <input type="number" :value="stage.move" readonly disabled>
+                        </div>
+                        <div class="form-group">
+                          <label>攻击:</label>
+                          <input type="number" :value="stage.atk" readonly disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label>初始HP:</label>
+                          <input type="number" :value="stage.hp_init" readonly disabled>
+                        </div>
+                        <div class="form-group">
+                          <label>HP上限:</label>
+                          <input type="number" :value="stage.hp_limit" readonly disabled>
+                        </div>
+                        <div class="form-group">
+                          <label>稀有度:</label>
+                          <input type="text" :value="stage.rarity" readonly disabled>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group">
+                        <label>图片URL:</label>
+                        <input type="text" :value="stage.image" readonly disabled>
+                      </div>
+                      <div class="form-group">
+                        <label>图标URL:</label>
+                        <input type="text" :value="stage.icon" readonly disabled>
+                      </div>
+                      <div class="form-group">
+                        <label>爆裂值:</label>
+                        <input type="text" :value="stage.brast" readonly disabled>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <!-- Text, effects, and fixed terms: Always editable -->
+                  <h3>描述与效果 (可编辑)</h3>
+                  <div class="form-group">
+                    <label>描述文本:</label>
+                    <textarea v-model="stage.text" rows="4" placeholder="输入卡牌描述"></textarea>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>绑定效果 (多个用逗号分隔):</label>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_effects || []).join(', ')"
+                      @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: effect1, effect2"
+                    >
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>绑定固词 (多个用逗号分隔):</label>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_fixed_terms || []).join(', ')"
+                      @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: term1, term2"
+                    >
+                  </div>
+                </div>
+              </template>
+            </template>
+          </template>
         </div>
 
         <!-- Summons Tab -->
@@ -919,6 +1072,66 @@ onMounted(() => {
 .form-group input[readonly] {
   background-color: #f0f0f0;
   cursor: not-allowed;
+}
+
+/* Form Row - for horizontal layout */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Hint text */
+.hint-text {
+  font-size: 13px;
+  color: #888;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+/* Readonly section */
+.readonly-section {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.readonly-section .hint-text {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  border-radius: 4px;
+}
+
+.readonly-section input:disabled,
+.readonly-section select:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Number and select inputs */
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input[type="number"]:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Items List */
