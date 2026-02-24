@@ -79,6 +79,23 @@
     ],
     "summons": [],
     "buildings": [],
-    "attacks": [],
+    "attacks": [
+        {
+            "id": "test_attack_ssr",
+            "name": "测试SSR攻击",
+            "cost": 3,
+            "move": 0,
+            "atk": 5,
+            "hp_init": 1,
+            "hp_limit": 1,
+            "rarity": "SSR",
+            "image": "",
+            "icon": "",
+            "brast": "",
+            "text": "这是一个SSR稀有度的攻击卡",
+            "bound_effects": [],
+            "bound_fixed_terms": []
+        }
+    ],
     "strategies": []
 }

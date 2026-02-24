@@ -40,7 +40,10 @@
                   @click="selectFormStage(form.id, stage.stage)"
                 >
                   <span class="tree-icon">◆</span>
-                  <span class="tree-text">{{ form.name }} 【{{ toRoman(stage.stage) }}】</span>
+                  <span class="tree-text">
+                    <span class="badge stage-badge">{{ toRoman(stage.stage) }}</span>
+                    {{ form.name }}
+                  </span>
                 </div>
               </template>
               <div class="tree-item child add-item" @click="addForm">
@@ -65,7 +68,10 @@
                 @click="selectItem('attacks', attack.id)"
               >
                 <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ attack.name }}{{ attack.rarity === 'SSR' ? ' 【决策】' : '' }}</span>
+                <span class="tree-text">
+                  <span v-if="attack.rarity === 'SSR'" class="badge decision-badge">决策</span>
+                  {{ attack.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addAttack">
                 <span class="tree-icon">+</span>
@@ -998,7 +1004,35 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.stage-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.decision-badge {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(245, 87, 108, 0.3);
+}
+
 
 .tree-section {
   margin-bottom: 5px;
