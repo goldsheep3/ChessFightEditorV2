@@ -1,0 +1,32 @@
+{
+  "name": "chessfighteditorv2",
+  "version": "1.0.0",
+  "description": "一个用于管理和编辑 ChessFight 游戏套组数据的 Web 应用程序。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goldsheep3/ChessFightEditorV2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/goldsheep3/ChessFightEditorV2/issues"
+  },
+  "homepage": "https://github.com/goldsheep3/ChessFightEditorV2#readme",
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.2.4",
+    "vite": "^5.4.21",
+    "vue": "^3.5.29",
+    "vue-router": "^4.6.4"
+  }
+}
