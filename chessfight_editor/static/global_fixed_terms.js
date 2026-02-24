@@ -57,8 +57,10 @@ function addTerm() {
     const termId = prompt('请输入固词ID (小写字母、数字、下划线):');
     if (!termId) return;
     
-    if (!/^[a-z0-9][a-z0-9\-_]*$/.test(termId)) {
-        alert('ID格式无效！');
+    try {
+        validateId(termId, '固词ID');
+    } catch (error) {
+        alert(error.message);
         return;
     }
     

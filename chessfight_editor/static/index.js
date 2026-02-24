@@ -35,9 +35,11 @@ function createNewSet() {
     
     if (!setCode) return;
     
-    // Validate set code
-    if (!/^[A-Za-z0-9][A-Za-z0-9\-_]*$/.test(setCode)) {
-        alert('套组代码格式无效！必须以字母或数字开头，只能包含字母、数字、下划线和短横线。');
+    // Validate set code using shared validation
+    try {
+        validateSetCode(setCode);
+    } catch (error) {
+        alert(error.message);
         return;
     }
     

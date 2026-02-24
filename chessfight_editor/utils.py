@@ -1,7 +1,10 @@
 """Utility functions for file operations"""
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict
+
+logger = logging.getLogger(__name__)
 
 def read_json_file(file_path: Path, default: Any = None) -> Dict:
     """Read JSON file, return default if not exists"""
@@ -11,8 +14,8 @@ def read_json_file(file_path: Path, default: Any = None) -> Dict:
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+    except (json.JSONDecodeError, IOError) as e:
+        logger.error(f"Error reading {file_path}: {e}")
         return default if default is not None else {}
 
 def write_json_file(file_path: Path, data: Dict) -> None:
@@ -34,7 +37,7 @@ def list_all_sets() -> list:
                 "name": data.get("name", set_code),
                 "description": data.get("description", "")
             })
-        except Exception as e:
-            print(f"Error reading set {set_code}: {e}")
+        except (json.JSONDecodeError, IOError) as e:
+            logger.error(f"Error reading set {set_code}: {e}")
     
     return sets

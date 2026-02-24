@@ -13,7 +13,8 @@ bp = Blueprint('set', __name__, url_prefix='/api/set')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    parts = filename.rsplit('.', 1)
+    return len(parts) == 2 and parts[1].lower() in ALLOWED_EXTENSIONS
 
 @bp.route('/list', methods=['GET'])
 def list_sets():

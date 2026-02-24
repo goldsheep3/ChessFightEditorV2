@@ -65,8 +65,10 @@ function addEffect() {
     const effectId = prompt('请输入效果ID (小写字母、数字、下划线):');
     if (!effectId) return;
     
-    if (!/^[a-z0-9][a-z0-9\-_]*$/.test(effectId)) {
-        alert('ID格式无效！');
+    try {
+        validateId(effectId, '效果ID');
+    } catch (error) {
+        alert(error.message);
         return;
     }
     
@@ -79,7 +81,7 @@ function addEffect() {
     if (!effectName) return;
     
     const alignment = prompt('请输入性质 (positive/neutral/negative):');
-    if (!['positive', 'neutral', 'negative'].includes(alignment)) {
+    if (!ALIGNMENT_OPTIONS.includes(alignment)) {
         alert('性质必须是 positive、neutral 或 negative');
         return;
     }
