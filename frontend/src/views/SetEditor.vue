@@ -297,7 +297,7 @@
                     <div class="form-group">
                       <label>形态名称:</label>
                       <input type="text" :value="form.name" readonly disabled>
-                      <p class="hint-text">提示：形态名称只能在【I】或【II】阶编辑</p>
+                      <p class="hint-text">提示：形态名称只能在【II】阶编辑</p>
                     </div>
                   </template>
                   
@@ -359,7 +359,7 @@
                   <!-- Stage 3: Show read-only stats -->
                   <template v-else>
                     <div class="readonly-section">
-                      <p class="hint-text">提示：以下数值属性只能在【I】或【II】阶编辑</p>
+                      <p class="hint-text">提示：以下数值属性只能在【II】阶编辑</p>
                       <div class="form-row">
                         <div class="form-group">
                           <label>消耗:</label>

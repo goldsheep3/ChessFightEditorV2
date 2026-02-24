@@ -37,7 +37,13 @@
                     "text": "基础单位 - I阶形态",
                     "bound_effects": [],
                     "bound_fixed_terms": []
-                },
+                }
+            ]
+        },
+        {
+            "id": "form1",
+            "name": "形态1",
+            "stages": [
                 {
                     "stage": 2,
                     "cost": 3,
@@ -49,7 +55,7 @@
                     "image": "",
                     "icon": "",
                     "brast": "",
-                    "text": "基础单位 - II阶形态",
+                    "text": "形态1 - II阶",
                     "bound_effects": [],
                     "bound_fixed_terms": []
                 },
@@ -64,7 +70,7 @@
                     "image": "",
                     "icon": "",
                     "brast": "",
-                    "text": "基础单位 - III阶进化形态",
+                    "text": "形态1 - III阶进化",
                     "bound_effects": ["test_effect"],
                     "bound_fixed_terms": ["test_term"]
                 }
