@@ -4,9 +4,9 @@ from flask import Blueprint, request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from pydantic import ValidationError
 
-from chessfight_editor.config import get_set_file_path, get_set_image_dir, IMAGE_DIR
-from chessfight_editor.utils import read_json_file, write_json_file, list_all_sets
-from chessfight_editor.models import SetSchemaV2
+from editor.config import get_set_file_path, get_set_image_dir, IMAGE_DIR
+from editor.utils import read_json_file, write_json_file, list_all_sets
+from editor.models import SetSchemaV2
 
 bp = Blueprint('set', __name__, url_prefix='/api/set')
 

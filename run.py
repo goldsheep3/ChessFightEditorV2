@@ -2,5 +2,5 @@
 # -*- coding: utf-8 -*-
 
 if __name__ == "__main__":
-    from chessfight_editor.app import main
+    from editor.app import main
     main()
