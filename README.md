@@ -113,16 +113,6 @@ npm run dev
 npm run build
 ```
 
-2. 在另一个终端启动 Vue 开发服务器（带热重载）：
-```bash
-npm run dev
-```
-
-开发模式下，前端将在 `http://localhost:5173` 运行，并通过代理访问后端 API。
-export FLASK_DEBUG=True
-python run.py
-```
-
 ## 界面预览
 
 ### 首页
