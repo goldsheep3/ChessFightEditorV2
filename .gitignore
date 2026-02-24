@@ -42,6 +42,16 @@ Thumbs.db
 logs/*.log
 *.log
 
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Vue build output
+editor/static/dist/
+
 # Application specific
 # Keep data directory structure but ignore actual data files (optional)
 # data/*.json

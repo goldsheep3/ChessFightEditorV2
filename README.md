@@ -14,7 +14,7 @@
 
 - **后端**：Flask 3.0+
 - **数据验证**：Pydantic 2.0+
-- **前端**：HTML + CSS + JavaScript (原生)
+- **前端**：Vue 3 + Vue Router + Vite
 - **数据存储**：JSON 文件
 
 ## 项目结构
@@ -22,7 +22,9 @@
 ```
 chessfight-set-editor/
 ├── run.py                          # 启动脚本
-├── requirements.txt                # 依赖清单
+├── requirements.txt                # Python 依赖清单
+├── package.json                    # Node.js 依赖清单
+├── vite.config.js                  # Vite 构建配置
 ├── data/                           # 数据存储目录
 │   ├── global_effects.json         # 全局通用效果库
 │   ├── global_fixed_terms.json     # 全局通用固词库
@@ -32,6 +34,21 @@ chessfight-set-editor/
 │       ├── global/                 # 通用图片存放处
 │       └── <set_code>/             # 按套组隔离的上传图片
 ├── logs/                           # 运行日志
+├── frontend/                       # Vue 3 前端源码
+│   ├── index.html                  # HTML 入口
+│   ├── public/                     # 公共资源
+│   │   └── fonts/                  # 字体文件
+│   └── src/
+│       ├── App.vue                 # 根组件
+│       ├── main.js                 # 应用入口
+│       ├── style.css               # 全局样式
+│       ├── router/                 # 路由配置
+│       ├── utils/                  # 工具函数 (API, 验证)
+│       └── views/                  # 页面组件
+│           ├── Home.vue            # 首页
+│           ├── SetEditor.vue       # 套组编辑器
+│           ├── GlobalEffects.vue   # 全局效果库
+│           └── GlobalFixedTerms.vue # 全局固词库
 └── editor/                         # 核心 Python 包
     ├── __init__.py
     ├── config.py                   # 路径等全局配置定义
@@ -40,14 +57,8 @@ chessfight-set-editor/
     ├── routes_set.py               # 路由：套组的 CRUD 和上传
     ├── routes_global.py            # 路由：通用库的 CRUD
     ├── app.py                      # Flask 实例工厂与主入口
-    ├── static/                     # 前端静态资源 (CSS/JS)
-    │   └── fonts/                  # 字体文件
-    │       └── AlibabaPuHuiTi-3-55-Regular.woff2
-    └── templates/                  # HTML 模板
-        ├── index.html              # 首页：套组与通用库导航
-        ├── editor.html             # 套组数据编辑器
-        ├── global_effects.html     # 通用效果库编辑器
-        └── global_fixed_terms.html # 通用固词库编辑器
+    └── static/
+        └── dist/                   # Vue 构建输出目录
 ```
 
 ## 安装
@@ -58,12 +69,20 @@ git clone https://github.com/goldsheep3/ChessFightEditorV2.git
 cd ChessFightEditorV2
 ```
 
-2. 安装依赖：
+2. 安装 Python 依赖：
 ```bash
 pip install -r requirements.txt
 ```
 
+3. 安装前端依赖并构建：
+```bash
+npm install
+npm run build
+```
+
 ## 使用
+
+### 生产模式
 
 启动服务器：
 ```bash
@@ -74,10 +93,24 @@ python run.py
 
 ### 开发模式
 
-如需启用调试模式（仅用于开发，不要在生产环境使用）：
+1. 启动 Flask 后端（带调试）：
 ```bash
 export FLASK_DEBUG=True
 python run.py
+```
+
+2. 在另一个终端启动 Vue 开发服务器（带热重载）：
+```bash
+npm run dev
+```
+
+开发模式下，前端将在 `http://localhost:5173` 运行，并通过代理访问后端 API。
+
+## 构建前端
+
+如果修改了前端代码，需要重新构建：
+```bash
+npm run build
 ```
 
 ## 界面预览
