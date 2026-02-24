@@ -39,5 +39,11 @@ def create_app():
 
 def main():
     """Main entry point"""
+    import os
+    
     app = create_app()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    # Only enable debug mode if explicitly set via environment variable
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 'yes')
+    
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode)

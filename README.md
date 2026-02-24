@@ -70,6 +70,14 @@ python run.py
 
 应用将在 `http://localhost:5000` 启动。
 
+### 开发模式
+
+如需启用调试模式（仅用于开发，不要在生产环境使用）：
+```bash
+export FLASK_DEBUG=True
+python run.py
+```
+
 ## 界面预览
 
 ### 首页
