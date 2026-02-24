@@ -2,9 +2,9 @@
 from flask import Blueprint, request, jsonify
 from pydantic import ValidationError
 
-from chessfight_editor.config import GLOBAL_EFFECTS_FILE, GLOBAL_FIXED_TERMS_FILE
-from chessfight_editor.utils import read_json_file, write_json_file
-from chessfight_editor.models import GlobalEffectsSchema, GlobalFixedTermsSchema
+from editor.config import GLOBAL_EFFECTS_FILE, GLOBAL_FIXED_TERMS_FILE
+from editor.utils import read_json_file, write_json_file
+from editor.models import GlobalEffectsSchema, GlobalFixedTermsSchema
 
 bp = Blueprint('global', __name__, url_prefix='/api/global')
 

@@ -1,15 +1,15 @@
 """Flask application factory"""
 from flask import Flask, render_template, send_from_directory
-from chessfight_editor.config import BASE_DIR, IMAGE_DIR
+from editor.config import BASE_DIR, IMAGE_DIR
 
 def create_app():
     """Create and configure Flask app"""
     app = Flask(__name__, 
-                template_folder=str(BASE_DIR / 'chessfight_editor' / 'templates'),
-                static_folder=str(BASE_DIR / 'chessfight_editor' / 'static'))
+                template_folder=str(BASE_DIR / 'editor' / 'templates'),
+                static_folder=str(BASE_DIR / 'editor' / 'static'))
     
     # Register blueprints
-    from chessfight_editor import routes_set, routes_global
+    from editor import routes_set, routes_global
     app.register_blueprint(routes_set.bp)
     app.register_blueprint(routes_global.bp)
     

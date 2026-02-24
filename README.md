@@ -32,7 +32,7 @@ chessfight-set-editor/
 │       ├── global/                 # 通用图片存放处
 │       └── <set_code>/             # 按套组隔离的上传图片
 ├── logs/                           # 运行日志
-└── chessfight_editor/              # 核心 Python 包
+└── editor/                         # 核心 Python 包
     ├── __init__.py
     ├── config.py                   # 路径等全局配置定义
     ├── utils.py                    # 通用工具函数
@@ -41,6 +41,8 @@ chessfight-set-editor/
     ├── routes_global.py            # 路由：通用库的 CRUD
     ├── app.py                      # Flask 实例工厂与主入口
     ├── static/                     # 前端静态资源 (CSS/JS)
+    │   └── fonts/                  # 字体文件
+    │       └── AlibabaPuHuiTi-3-55-Regular.woff2
     └── templates/                  # HTML 模板
         ├── index.html              # 首页：套组与通用库导航
         ├── editor.html             # 套组数据编辑器

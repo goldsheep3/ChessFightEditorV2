@@ -25,7 +25,7 @@ def write_json_file(file_path: Path, data: Dict) -> None:
 
 def list_all_sets() -> list:
     """List all set files in the data directory"""
-    from chessfight_editor.config import DATA_DIR
+    from editor.config import DATA_DIR
     
     sets = []
     for file_path in DATA_DIR.glob("set_*.json"):
