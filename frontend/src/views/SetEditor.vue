@@ -39,6 +39,9 @@
                 >
                   <span class="tree-icon">◆</span>
                   <span class="tree-text">
+                    <span class="badge rarity-badge" :class="getRarityClass(form.stages?.[0]?.rarity || 'R')">
+                      {{ getRarityText(form.stages?.[0]?.rarity) }}
+                    </span>
                     {{ form.name }}
                   </span>
                 </div>
@@ -66,7 +69,10 @@
               >
                 <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span v-if="attack.rarity === 'SSR'" class="badge decision-badge">决策</span>
+                  <span class="badge rarity-badge" :class="getRarityClass(attack.rarity)">
+                    {{ getRarityText(attack.rarity) }}
+                  </span>
+                  <span v-if="attack.is_decision" class="badge decision-badge">决策</span>
                   {{ attack.name }}
                 </span>
               </div>
@@ -92,7 +98,13 @@
                 @click="selectItem('strategies', strategy.id)"
               >
                 <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ strategy.name }}</span>
+                <span class="tree-text">
+                  <span class="badge rarity-badge" :class="getRarityClass(strategy.rarity)">
+                    {{ getRarityText(strategy.rarity) }}
+                  </span>
+                  <span v-if="strategy.is_decision" class="badge decision-badge">决策</span>
+                  {{ strategy.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addStrategy">
                 <span class="tree-icon">+</span>
@@ -1155,6 +1167,21 @@ function toRoman(num) {
   return lookup[num] || num
 }
 
+// Get rarity badge class for styling
+function getRarityClass(rarity) {
+  const rarityMap = {
+    'SSR': 'rarity-ssr',
+    'SR': 'rarity-sr',
+    'R': 'rarity-r'
+  }
+  return rarityMap[rarity] || 'rarity-r'
+}
+
+// Get rarity display text
+function getRarityText(rarity) {
+  return rarity || 'R'
+}
+
 // Effects management
 function addEffect() {
   const effectId = prompt('请输入效果ID (小写字母、数字、下划线):')
@@ -1640,6 +1667,32 @@ onMounted(() => {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
   box-shadow: 0 2px 4px rgba(245, 87, 108, 0.3);
+}
+
+.rarity-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.rarity-ssr {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b4513;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+}
+
+.rarity-sr {
+  background: linear-gradient(135deg, #9b59b6 0%, #c39bd3 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(155, 89, 182, 0.4);
+}
+
+.rarity-r {
+  background: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.4);
 }
 
 
