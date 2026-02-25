@@ -533,7 +533,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI } from '@/utils/api'
-import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION } from '@/utils/validation'
+import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
 
 const props = defineProps({
   setCode: {
@@ -679,20 +679,17 @@ function deleteFixedTerm(id) {
 
 // Forms management
 function addForm() {
-  const formId = prompt('请输入形态ID (小写字母、数字、下划线):')
-  if (!formId) return
+  // Generate random 8-character ID automatically
+  let formId = generateRandomId(8)
   
-  try {
-    validateId(formId, '形态ID')
-  } catch (err) {
-    alert(err.message)
-    return
+  // Ensure the ID is unique
+  if (!setData.value.forms) setData.value.forms = []
+  while (setData.value.forms.some(f => f.id === formId)) {
+    formId = generateRandomId(8)
   }
   
-  const formName = prompt('请输入形态名称:')
-  if (!formName) return
-  
-  if (!setData.value.forms) setData.value.forms = []
+  // Use default name "新建卡牌"
+  const formName = "新建卡牌"
   
   setData.value.forms.push({
     id: formId,
@@ -739,18 +736,18 @@ function deleteForm(index) {
 
 // Simplified add functions for other entities
 function addSummon() {
-  const id = prompt('请输入召唤物ID:')
-  if (!id) return
-  try {
-    validateId(id, '召唤物ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入召唤物名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.summons) setData.value.summons = []
+  
+  // Ensure the ID is unique
+  while (setData.value.summons.some(s => s.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.summons.push({
     id, name,
     cost: 0, move: 0, atk: 0, hp_init: 1, hp_limit: 1,
@@ -765,18 +762,18 @@ function deleteSummon(index) {
 }
 
 function addBuilding() {
-  const id = prompt('请输入建筑ID:')
-  if (!id) return
-  try {
-    validateId(id, '建筑ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入建筑名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.buildings) setData.value.buildings = []
+  
+  // Ensure the ID is unique
+  while (setData.value.buildings.some(b => b.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.buildings.push({
     id, name,
     cost: 0, hp_init: 1, hp_limit: 1,
@@ -791,18 +788,18 @@ function deleteBuilding(index) {
 }
 
 function addAttack() {
-  const id = prompt('请输入攻击ID:')
-  if (!id) return
-  try {
-    validateId(id, '攻击ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入攻击名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.attacks) setData.value.attacks = []
+  
+  // Ensure the ID is unique
+  while (setData.value.attacks.some(a => a.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.attacks.push({
     id, name,
     cost: 0,
@@ -817,18 +814,18 @@ function deleteAttack(index) {
 }
 
 function addStrategy() {
-  const id = prompt('请输入策略ID:')
-  if (!id) return
-  try {
-    validateId(id, '策略ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入策略名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.strategies) setData.value.strategies = []
+  
+  // Ensure the ID is unique
+  while (setData.value.strategies.some(s => s.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.strategies.push({
     id, name,
     cost: 0,

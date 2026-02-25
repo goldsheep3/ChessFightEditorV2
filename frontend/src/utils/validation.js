@@ -33,3 +33,13 @@ export function validateSetCode(code) {
   }
   return true
 }
+
+// Generate a random ID with 8 characters (0-9a-z)
+export function generateRandomId(length = 8) {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+  let result = ''
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return result
+}
