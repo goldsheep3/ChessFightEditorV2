@@ -10,7 +10,7 @@
           <div class="modal-body">
             <slot></slot>
           </div>
-          <div v-if="showFooter" class="modal-footer">
+          <div v-if="showFooter || $slots.footer" class="modal-footer">
             <slot name="footer">
               <button v-if="showCancel" class="btn btn-secondary" @click="cancel">
                 {{ cancelText }}
