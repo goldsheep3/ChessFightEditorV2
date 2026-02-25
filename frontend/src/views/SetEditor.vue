@@ -456,7 +456,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
@@ -472,8 +472,10 @@ const router = useRouter()
 const loading = ref(true)
 const error = ref(null)
 const setData = ref(null)
+const originalData = ref(null) // Store original data for change detection
 const activeTab = ref('basic')
 const selectedItem = ref({ type: 'basic', id: null, stage: null }) // Track selected item in tree
+const hasUnsavedChanges = ref(false)
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -504,6 +506,9 @@ async function loadSet() {
   try {
     const data = await setAPI.get(props.setCode)
     setData.value = data
+    // Deep copy original data for change detection
+    originalData.value = JSON.parse(JSON.stringify(data))
+    hasUnsavedChanges.value = false
     loading.value = false
   } catch (err) {
     console.error('Error loading set:', err)
@@ -513,18 +518,45 @@ async function loadSet() {
 }
 
 function goBack() {
+  if (hasUnsavedChanges.value) {
+    const choice = confirm('当前页面有未保存的更改。是否保存？\n\n点击"确定"保存更改\n点击"取消"放弃更改')
+    if (choice) {
+      saveSet().then(() => {
+        router.push('/')
+      })
+      return
+    } else {
+      // User chose to discard changes
+      hasUnsavedChanges.value = false
+    }
+  }
   router.push('/')
 }
 
 // Tree navigation helpers
 function selectItem(type, id = null, stage = null) {
+  // Check if there are unsaved changes
+  if (hasUnsavedChanges.value) {
+    const choice = confirm('当前页面有未保存的更改。是否保存？\n\n点击"确定"保存更改\n点击"取消"放弃更改')
+    if (choice) {
+      saveSet().then(() => {
+        activeTab.value = type
+        selectedItem.value = { type, id, stage }
+      })
+      return
+    } else {
+      // Discard changes - reload original data
+      setData.value = JSON.parse(JSON.stringify(originalData.value))
+      hasUnsavedChanges.value = false
+    }
+  }
+  
   activeTab.value = type
   selectedItem.value = { type, id, stage }
 }
 
 function selectForm(formId) {
-  activeTab.value = 'forms'
-  selectedItem.value = { type: 'forms', id: formId }
+  selectItem('forms', formId)
 }
 
 function selectFormStage(formId, stage) {
@@ -773,12 +805,26 @@ function deleteStrategy(index) {
 async function saveSet() {
   try {
     await setAPI.save(props.setCode, setData.value)
+    // Update original data after successful save
+    originalData.value = JSON.parse(JSON.stringify(setData.value))
+    hasUnsavedChanges.value = false
     alert('保存成功！')
   } catch (err) {
     console.error('Error saving set:', err)
     alert('保存失败: ' + err.message)
   }
 }
+
+// Watch for changes in setData
+watch(
+  () => setData.value,
+  (newVal) => {
+    if (!originalData.value || !newVal) return
+    // Compare current data with original to detect changes
+    hasUnsavedChanges.value = JSON.stringify(newVal) !== JSON.stringify(originalData.value)
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   loadSet()
