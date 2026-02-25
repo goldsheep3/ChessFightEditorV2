@@ -40,7 +40,7 @@
       <div class="center-panel">
         <div class="content-header">
           <h2>📌 全局固词列表</h2>
-          <button class="add-btn" @click="addTerm">➕ 添加固词</button>
+          <button class="add-btn" @click="openAddModal">➕ 添加固词</button>
         </div>
 
         <div v-if="Object.keys(terms).length === 0" class="empty-state">
@@ -52,15 +52,13 @@
           <div v-for="(term, id) in terms" :key="id" :id="`term-${id}`" class="term-card">
             <div class="card-header">
               <h4>{{ term.name }} <span class="id-badge">({{ id }})</span></h4>
-              <button class="delete-btn" @click="deleteTerm(id)">🗑️ 删除</button>
+              <button class="edit-btn" @click="openEditModal(id, term)">✏️ 编辑</button>
             </div>
-            <div class="form-group">
-              <label>名称:</label>
-              <input type="text" v-model="term.name">
-            </div>
-            <div class="form-group">
-              <label>备注:</label>
-              <textarea rows="2" v-model="term.note"></textarea>
+            <div class="term-details">
+              <div v-if="term.note" class="detail-item">
+                <span class="detail-label">备注:</span>
+                <span class="detail-value">{{ term.note }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -90,6 +88,49 @@
         </div>
       </div>
     </div>
+    
+    <!-- Edit/Add Term Modal -->
+    <ModalDialog 
+      v-model="showEditModal" 
+      :title="isEditMode ? '✏️ 编辑固词' : '➕ 添加固词'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveTerm"
+    >
+      <div class="form-group">
+        <label>固词ID <span class="required">*</span></label>
+        <input 
+          v-model="editingTerm.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditMode"
+          @keyup.enter="handleSaveTerm"
+        >
+        <small v-if="!isEditMode" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingTerm.name" 
+          type="text" 
+          placeholder="固词名称"
+          @keyup.enter="handleSaveTerm"
+        >
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="editingTerm.note" 
+          rows="3" 
+          placeholder="固词备注（可选）"
+        ></textarea>
+      </div>
+      <div v-if="isEditMode" class="modal-actions">
+        <button class="btn-danger" @click="handleDeleteTerm">🗑️ 删除此固词</button>
+      </div>
+    </ModalDialog>
   </div>
 </template>
 
@@ -98,11 +139,24 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { globalAPI } from '@/utils/api'
 import { validateId } from '@/utils/validation'
+import { useNotification } from '@/utils/notification'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 const router = useRouter()
+const notification = useNotification()
 const loading = ref(true)
 const error = ref(null)
 const terms = ref({})
+
+// Modal state
+const showEditModal = ref(false)
+const isEditMode = ref(false)
+const editingTerm = ref({
+  id: '',
+  name: '',
+  note: ''
+})
+const originalId = ref('')
 
 async function loadTerms() {
   try {
@@ -132,43 +186,91 @@ function scrollToTerm(id) {
   }
 }
 
-function addTerm() {
-  const termId = prompt('请输入固词ID (小写字母、数字、下划线):')
-  if (!termId) return
+function openAddModal() {
+  isEditMode.value = false
+  editingTerm.value = {
+    id: '',
+    name: '',
+    note: ''
+  }
+  originalId.value = ''
+  showEditModal.value = true
+}
+
+function openEditModal(id, term) {
+  isEditMode.value = true
+  editingTerm.value = {
+    id: id,
+    name: term.name,
+    note: term.note || ''
+  }
+  originalId.value = id
+  showEditModal.value = true
+}
+
+async function handleSaveTerm() {
+  const { id, name, note } = editingTerm.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：固词ID和名称')
+    return
+  }
+  
+  // Validate ID for new terms
+  if (!isEditMode.value) {
+    try {
+      validateId(id, '固词ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (terms.value[id]) {
+      notification.error('该固词ID已存在！')
+      return
+    }
+  }
+  
+  terms.value[id] = {
+    name,
+    note: note || ''
+  }
   
   try {
-    validateId(termId, '固词ID')
+    await globalAPI.saveFixedTerms({ fixed_terms: terms.value })
+    notification.success(isEditMode.value ? '固词已更新！' : '固词已添加！')
+    showEditModal.value = false
   } catch (err) {
-    alert(err.message)
-    return
-  }
-  
-  if (terms.value[termId]) {
-    alert('该ID已存在！')
-    return
-  }
-  
-  const termName = prompt('请输入固词名称:')
-  if (!termName) return
-  
-  terms.value[termId] = {
-    name: termName,
-    note: ""
+    console.error('Error saving terms:', err)
+    notification.error('保存失败: ' + err.message)
   }
 }
 
-function deleteTerm(id) {
-  if (!confirm('确定要删除此固词吗？')) return
+async function handleDeleteTerm() {
+  if (!confirm('确定要删除此固词吗？此操作无法撤销！')) {
+    return
+  }
+  
+  const id = originalId.value
   delete terms.value[id]
+  
+  try {
+    await globalAPI.saveFixedTerms({ fixed_terms: terms.value })
+    notification.success('固词已删除！')
+    showEditModal.value = false
+  } catch (err) {
+    console.error('Error deleting term:', err)
+    notification.error('删除失败: ' + err.message)
+  }
 }
 
 async function saveTerms() {
   try {
     await globalAPI.saveFixedTerms({ fixed_terms: terms.value })
-    alert('保存成功！')
+    notification.success('保存成功！')
   } catch (err) {
     console.error('Error saving terms:', err)
-    alert('保存失败: ' + err.message)
+    notification.error('保存失败: ' + err.message)
   }
 }
 
@@ -177,6 +279,7 @@ onMounted(() => {
 })
 </script>
 
+<style scoped>
 <style scoped>
 .editor-layout {
   display: flex;
@@ -556,5 +659,78 @@ onMounted(() => {
   .right-panel {
     display: none;
   }
+}
+
+/* Additional styles for display-only mode */
+.edit-btn {
+  padding: 6px 12px;
+  border: none;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #5568d3;
+}
+
+.term-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #666;
+  min-width: 60px;
+}
+
+.detail-value {
+  color: #333;
+  flex: 1;
+}
+
+/* Modal specific styles */
+.modal-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
 }
 </style>
