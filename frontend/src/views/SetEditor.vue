@@ -321,7 +321,6 @@
                   v-model="form.rarity"
                   :class="{ modified: isFormFieldModified(form.id, 'rarity') }"
                 >
-                  <option value="N">N</option>
                   <option value="R">R</option>
                   <option value="SR">SR</option>
                   <option value="SSR">SSR</option>
@@ -427,8 +426,8 @@
                     <div class="input-with-button">
                       <input 
                         type="text" 
-                        :value="(stage.bound_effects || []).join(', ')"
-                        @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        :value="boundEffectsToString(stage.bound_effects)"
+                        @input="stage.bound_effects = stringToBoundEffects($event.target.value)"
                         placeholder="例如: effect1, effect2"
                         :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
                       >
@@ -441,8 +440,8 @@
                     <div class="input-with-button">
                       <input 
                         type="text" 
-                        :value="(stage.bound_fixed_terms || []).join(', ')"
-                        @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        :value="boundTermsToString(stage.bound_fixed_terms)"
+                        @input="stage.bound_fixed_terms = stringToBoundTerms($event.target.value)"
                         placeholder="例如: term1, term2"
                         :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
                       >
@@ -697,6 +696,44 @@ const designersStr = computed({
   }
 })
 
+// Helper functions to convert between string arrays and bound ref objects
+function boundEffectsToString(boundEffects) {
+  if (!boundEffects || boundEffects.length === 0) return ''
+  return boundEffects.map(item => item.effect_ref || item).join(', ')
+}
+
+function stringToBoundEffects(str) {
+  if (!str || str.trim() === '') return []
+  return str.split(',').map(s => s.trim()).filter(Boolean).map((ref, index) => ({
+    id: `bind_${Date.now()}_${index}`,
+    effect_ref: ref
+  }))
+}
+
+function boundTermsToString(boundTerms) {
+  if (!boundTerms || boundTerms.length === 0) return ''
+  return boundTerms.map(item => item.term_ref || item).join(', ')
+}
+
+function stringToBoundTerms(str) {
+  if (!str || str.trim() === '') return []
+  return str.split(',').map(s => s.trim()).filter(Boolean).map((ref, index) => ({
+    id: `bind_${Date.now()}_${index}`,
+    term_ref: ref
+  }))
+}
+
+// Extract effect refs from bound effects for validation
+function extractEffectRefs(boundEffects) {
+  if (!boundEffects || boundEffects.length === 0) return []
+  return boundEffects.map(item => item.effect_ref || item)
+}
+
+function extractTermRefs(boundTerms) {
+  if (!boundTerms || boundTerms.length === 0) return []
+  return boundTerms.map(item => item.term_ref || item)
+}
+
 async function loadSet() {
   try {
     const data = await setAPI.get(props.setCode)
@@ -776,10 +813,10 @@ function getCurrentStageBoundItems() {
   
   form.stages?.forEach(stage => {
     if (stage.bound_effects) {
-      allEffects.push(...stage.bound_effects)
+      allEffects.push(...extractEffectRefs(stage.bound_effects))
     }
     if (stage.bound_fixed_terms) {
-      allTerms.push(...stage.bound_fixed_terms)
+      allTerms.push(...extractTermRefs(stage.bound_fixed_terms))
     }
   })
   
