@@ -98,9 +98,21 @@
       </div>
       <div v-if="selectedFiles.length > 0" class="selected-files">
         <p><strong>已选择 {{ selectedFiles.length }} 个文件：</strong></p>
-        <ul>
-          <li v-for="(file, i) in selectedFiles" :key="i">{{ file.name }}</li>
-        </ul>
+        <div class="file-rename-list">
+          <div v-for="(item, i) in fileList" :key="i" class="file-rename-item">
+            <span class="file-index">{{ i + 1 }}.</span>
+            <input 
+              v-model="item.newName" 
+              type="text" 
+              class="file-rename-input"
+              :placeholder="item.originalName"
+              @input="validateFileName(i)"
+            >
+            <span class="file-extension">.{{ item.extension }}</span>
+            <span v-if="item.error" class="file-error">{{ item.error }}</span>
+          </div>
+        </div>
+        <small class="form-hint">可以修改文件名，仅支持字母、数字、下划线和连字符</small>
       </div>
       <template #footer>
         <button class="btn btn-secondary" @click="showUploadModal = false">取消</button>
@@ -131,6 +143,7 @@ const images = ref([])
 const showUploadModal = ref(false)
 const imageFolder = ref('')
 const selectedFiles = ref([])
+const fileList = ref([])
 const fileInput = ref(null)
 
 async function loadAllImages() {
@@ -158,11 +171,57 @@ function openUploadModal() {
 
 function handleFileSelect(event) {
   selectedFiles.value = Array.from(event.target.files)
+  
+  // Create file list with rename capabilities
+  fileList.value = selectedFiles.value.map(file => {
+    const lastDotIndex = file.name.lastIndexOf('.')
+    const nameWithoutExt = lastDotIndex > 0 ? file.name.substring(0, lastDotIndex) : file.name
+    const extension = lastDotIndex > 0 ? file.name.substring(lastDotIndex + 1) : ''
+    
+    return {
+      originalName: file.name,
+      newName: nameWithoutExt,
+      extension: extension,
+      file: file,
+      error: null
+    }
+  })
+}
+
+function validateFileName(index) {
+  const item = fileList.value[index]
+  const fileName = item.newName.trim()
+  
+  if (!fileName) {
+    item.error = '文件名不能为空'
+    return false
+  }
+  
+  if (!/^[0-9a-zA-Z_-]+$/.test(fileName)) {
+    item.error = '仅支持字母、数字、下划线和连字符'
+    return false
+  }
+  
+  item.error = null
+  return true
 }
 
 async function uploadImages() {
   if (selectedFiles.value.length === 0) {
     notification.error('请先选择要上传的文件')
+    return
+  }
+  
+  // Validate all file names
+  let hasError = false
+  for (let i = 0; i < fileList.value.length; i++) {
+    if (!validateFileName(i)) {
+      hasError = true
+    }
+  }
+  
+  if (hasError) {
+    notification.error('请修正文件名错误')
     return
   }
   
@@ -176,12 +235,18 @@ async function uploadImages() {
   let successCount = 0
   let failCount = 0
   
-  for (const file of selectedFiles.value) {
+  for (const item of fileList.value) {
     try {
-      await galleryAPI.uploadImage(folder, file)
+      // Create a new File object with the renamed filename
+      const renamedFile = new File(
+        [item.file], 
+        `${item.newName}.${item.extension}`,
+        { type: item.file.type }
+      )
+      await galleryAPI.uploadImage(folder, renamedFile)
       successCount++
     } catch (error) {
-      console.error(`Failed to upload ${file.name}:`, error)
+      console.error(`Failed to upload ${item.newName}.${item.extension}:`, error)
       failCount++
     }
   }
@@ -190,6 +255,7 @@ async function uploadImages() {
   
   // Clear selection
   selectedFiles.value = []
+  fileList.value = []
   imageFolder.value = ''
   if (fileInput.value) {
     fileInput.value.value = ''
@@ -490,6 +556,54 @@ onMounted(() => {
   padding: 15px;
   background: #f9f9f9;
   border-radius: 6px;
+}
+
+.file-rename-list {
+  margin-top: 15px;
+}
+
+.file-rename-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.file-index {
+  color: #999;
+  font-size: 13px;
+  min-width: 25px;
+}
+
+.file-rename-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.file-rename-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.file-rename-item.has-error .file-rename-input {
+  border-color: #e74c3c;
+}
+
+.file-extension {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.file-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-left: 5px;
 }
 
 .selected-files ul {
