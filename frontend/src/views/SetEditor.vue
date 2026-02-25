@@ -523,57 +523,256 @@
         </div>
 
         <!-- Attacks Tab -->
-        <div v-if="activeTab === 'attacks'" class="edit-section">
-          <h2>攻击</h2>
-          <div class="items-list">
-            <p v-if="!setData.attacks || setData.attacks.length === 0" class="empty-hint">暂无攻击</p>
-            <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item-display">
-              <div class="card-header">
-                <h4>{{ attack.name }} <span class="id-badge">({{ attack.id }})</span></h4>
-                <button class="edit-btn" @click="openEditAttackModal(index)">✏️ 编辑</button>
+        <div v-if="activeTab === 'attacks' && selectedItem.id" class="edit-section">
+          <template v-for="attack in setData.attacks" :key="attack.id">
+            <template v-if="attack.id === selectedItem.id">
+              <h2>{{ attack.name }}</h2>
+              
+              <h3>基础信息</h3>
+              <div class="form-group">
+                <label>攻击卡ID:</label>
+                <input type="text" :value="attack.id" readonly>
               </div>
-              <div class="card-info">
-                <div class="info-row">
-                  <span class="info-label">费用:</span>
-                  <span class="info-value">{{ attack.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ attack.rarity }}</span>
+              <div class="form-group">
+                <label>攻击卡名称:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.name" 
+                  placeholder="输入攻击卡名称"
+                >
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>消耗:</label>
+                  <input 
+                    type="number" 
+                    v-model.number="attack.cost" 
+                    min="0"
+                  >
                 </div>
-                <div v-if="attack.text" class="info-row full">
-                  <span class="info-label">描述:</span>
-                  <span class="info-value">{{ attack.text }}</span>
+                <div class="form-group">
+                  <label>攻击力变化:</label>
+                  <input 
+                    type="number" 
+                    v-model.number="attack.atk_delta"
+                  >
+                </div>
+                <div class="form-group">
+                  <label>稀有度:</label>
+                  <select v-model="attack.rarity">
+                    <option value="R">R</option>
+                    <option value="SR">SR</option>
+                    <option value="SSR">SSR</option>
+                  </select>
                 </div>
               </div>
-            </div>
-          </div>
-          <button class="add-btn" @click="addAttack">➕ 添加攻击</button>
+              
+              <div class="form-group">
+                <label>是否为决策卡:</label>
+                <select v-model="attack.is_decision">
+                  <option :value="false">否</option>
+                  <option :value="true">是</option>
+                </select>
+              </div>
+              
+              <div v-if="attack.is_decision" class="form-group">
+                <label>决策免费条件:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.decision_free_condition" 
+                  placeholder="输入决策免费条件"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>图片URL:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.image" 
+                  placeholder="图片地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>图标URL:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.icon" 
+                  placeholder="图标地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>爆裂值:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.brast" 
+                  placeholder="爆裂值"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>描述文本:</label>
+                <textarea 
+                  v-model="attack.text" 
+                  rows="4" 
+                  placeholder="输入卡牌描述"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定效果 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="boundEffectsToString(attack.bound_effects)"
+                    @input="attack.bound_effects = stringToBoundEffects($event.target.value)"
+                    placeholder="例如: effect1, effect2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定固词 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="boundTermsToString(attack.bound_fixed_terms)"
+                    @input="attack.bound_fixed_terms = stringToBoundTerms($event.target.value)"
+                    placeholder="例如: term1, term2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="delete-btn" @click="deleteAttack(attack.id)">🗑️ 删除此攻击卡</button>
+              </div>
+            </template>
+          </template>
         </div>
 
         <!-- Strategies Tab -->
-        <div v-if="activeTab === 'strategies'" class="edit-section">
-          <h2>策略</h2>
-          <div class="items-list">
-            <p v-if="!setData.strategies || setData.strategies.length === 0" class="empty-hint">暂无策略</p>
-            <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item-display">
-              <div class="card-header">
-                <h4>{{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span></h4>
-                <button class="edit-btn" @click="openEditStrategyModal(index)">✏️ 编辑</button>
+        <div v-if="activeTab === 'strategies' && selectedItem.id" class="edit-section">
+          <template v-for="strategy in setData.strategies" :key="strategy.id">
+            <template v-if="strategy.id === selectedItem.id">
+              <h2>{{ strategy.name }}</h2>
+              
+              <h3>基础信息</h3>
+              <div class="form-group">
+                <label>策略卡ID:</label>
+                <input type="text" :value="strategy.id" readonly>
               </div>
-              <div class="card-info">
-                <div class="info-row">
-                  <span class="info-label">费用:</span>
-                  <span class="info-value">{{ strategy.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ strategy.rarity }}</span>
+              <div class="form-group">
+                <label>策略卡名称:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.name" 
+                  placeholder="输入策略卡名称"
+                >
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>消耗:</label>
+                  <input 
+                    type="number" 
+                    v-model.number="strategy.cost" 
+                    min="0"
+                  >
                 </div>
-                <div v-if="strategy.text" class="info-row full">
-                  <span class="info-label">描述:</span>
-                  <span class="info-value">{{ strategy.text }}</span>
+                <div class="form-group">
+                  <label>稀有度:</label>
+                  <select v-model="strategy.rarity">
+                    <option value="R">R</option>
+                    <option value="SR">SR</option>
+                    <option value="SSR">SSR</option>
+                  </select>
                 </div>
               </div>
-            </div>
-          </div>
-          <button class="add-btn" @click="addStrategy">➕ 添加策略</button>
+              
+              <div class="form-group">
+                <label>是否为决策卡:</label>
+                <select v-model="strategy.is_decision">
+                  <option :value="false">否</option>
+                  <option :value="true">是</option>
+                </select>
+              </div>
+              
+              <div v-if="strategy.is_decision" class="form-group">
+                <label>决策免费条件:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.decision_free_condition" 
+                  placeholder="输入决策免费条件"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>图片URL:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.image" 
+                  placeholder="图片地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>图标URL:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.icon" 
+                  placeholder="图标地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>爆裂值:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.brast" 
+                  placeholder="爆裂值"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>描述文本:</label>
+                <textarea 
+                  v-model="strategy.text" 
+                  rows="4" 
+                  placeholder="输入卡牌描述"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定效果 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="boundEffectsToString(strategy.bound_effects)"
+                    @input="strategy.bound_effects = stringToBoundEffects($event.target.value)"
+                    placeholder="例如: effect1, effect2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定固词 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="boundTermsToString(strategy.bound_fixed_terms)"
+                    @input="strategy.bound_fixed_terms = stringToBoundTerms($event.target.value)"
+                    placeholder="例如: term1, term2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="delete-btn" @click="deleteStrategy(strategy.id)">🗑️ 删除此策略卡</button>
+              </div>
+            </template>
+          </template>
         </div>
       </div>
 
@@ -800,25 +999,43 @@ function validateBoundItems(boundEffects, boundTerms) {
 
 // Get current stage data for validation
 function getCurrentStageBoundItems() {
-  if (activeTab.value !== 'forms' || !selectedItem.value.id) {
-    return { effects: [], terms: [] }
-  }
-  
-  const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
-  if (!form) return { effects: [], terms: [] }
-  
-  // Collect all bound items from all stages
   const allEffects = []
   const allTerms = []
   
-  form.stages?.forEach(stage => {
-    if (stage.bound_effects) {
-      allEffects.push(...extractEffectRefs(stage.bound_effects))
+  if (activeTab.value === 'forms' && selectedItem.value.id) {
+    const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
+    if (form) {
+      // Collect all bound items from all stages
+      form.stages?.forEach(stage => {
+        if (stage.bound_effects) {
+          allEffects.push(...extractEffectRefs(stage.bound_effects))
+        }
+        if (stage.bound_fixed_terms) {
+          allTerms.push(...extractTermRefs(stage.bound_fixed_terms))
+        }
+      })
     }
-    if (stage.bound_fixed_terms) {
-      allTerms.push(...extractTermRefs(stage.bound_fixed_terms))
+  } else if (activeTab.value === 'attacks' && selectedItem.value.id) {
+    const attack = setData.value?.attacks?.find(a => a.id === selectedItem.value.id)
+    if (attack) {
+      if (attack.bound_effects) {
+        allEffects.push(...extractEffectRefs(attack.bound_effects))
+      }
+      if (attack.bound_fixed_terms) {
+        allTerms.push(...extractTermRefs(attack.bound_fixed_terms))
+      }
     }
-  })
+  } else if (activeTab.value === 'strategies' && selectedItem.value.id) {
+    const strategy = setData.value?.strategies?.find(s => s.id === selectedItem.value.id)
+    if (strategy) {
+      if (strategy.bound_effects) {
+        allEffects.push(...extractEffectRefs(strategy.bound_effects))
+      }
+      if (strategy.bound_fixed_terms) {
+        allTerms.push(...extractTermRefs(strategy.bound_fixed_terms))
+      }
+    }
+  }
   
   return {
     effects: [...new Set(allEffects)], // Remove duplicates
@@ -1128,20 +1345,38 @@ function addAttack() {
     id = generateRandomId(8)
   }
   
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
+  // Use default name "新建攻击卡"
+  const name = "新建攻击卡"
   
-  setData.value.attacks.push({
-    id, name,
+  const newAttack = {
+    id, 
+    name,
     cost: 0,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+    card_type: "attack",
+    atk_delta: 0,
+    is_decision: false,
+    rarity: "R", 
+    image: "", 
+    icon: "", 
+    brast: "", 
+    text: "",
+    bound_effects: [], 
+    bound_fixed_terms: []
+  }
+  
+  setData.value.attacks.push(newAttack)
+  // Automatically select the new attack
+  selectItem('attacks', id)
 }
 
-function deleteAttack(index) {
-  if (!confirm('确定要删除此攻击吗？')) return
-  setData.value.attacks.splice(index, 1)
+function deleteAttack(id) {
+  if (!confirm('确定要删除此攻击卡吗？')) return
+  const index = setData.value.attacks.findIndex(a => a.id === id)
+  if (index !== -1) {
+    setData.value.attacks.splice(index, 1)
+    // Go back to basic info after deleting
+    selectItem('basic')
+  }
 }
 
 function addStrategy() {
@@ -1154,20 +1389,37 @@ function addStrategy() {
     id = generateRandomId(8)
   }
   
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
+  // Use default name "新建策略卡"
+  const name = "新建策略卡"
   
-  setData.value.strategies.push({
-    id, name,
+  const newStrategy = {
+    id, 
+    name,
     cost: 0,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+    card_type: "strategy",
+    is_decision: false,
+    rarity: "R", 
+    image: "", 
+    icon: "", 
+    brast: "", 
+    text: "",
+    bound_effects: [], 
+    bound_fixed_terms: []
+  }
+  
+  setData.value.strategies.push(newStrategy)
+  // Automatically select the new strategy
+  selectItem('strategies', id)
 }
 
-function deleteStrategy(index) {
-  if (!confirm('确定要删除此策略吗？')) return
-  setData.value.strategies.splice(index, 1)
+function deleteStrategy(id) {
+  if (!confirm('确定要删除此策略卡吗？')) return
+  const index = setData.value.strategies.findIndex(s => s.id === id)
+  if (index !== -1) {
+    setData.value.strategies.splice(index, 1)
+    // Go back to basic info after deleting
+    selectItem('basic')
+  }
 }
 
 // Placeholder edit functions for items - these open the item for editing
@@ -1182,18 +1434,6 @@ function openEditBuildingModal(index) {
   activeTab.value = 'buildings'
   selectedItem.value = { type: 'buildings', id: setData.value.buildings[index].id }
   notification.info('建筑编辑功能开发中，请保存后在此界面编辑')
-}
-
-function openEditAttackModal(index) {
-  activeTab.value = 'attacks'
-  selectedItem.value = { type: 'attacks', id: setData.value.attacks[index].id }
-  notification.info('攻击编辑功能开发中，请保存后在此界面编辑')
-}
-
-function openEditStrategyModal(index) {
-  activeTab.value = 'strategies'
-  selectedItem.value = { type: 'strategies', id: setData.value.strategies[index].id }
-  notification.info('策略编辑功能开发中，请保存后在此界面编辑')
 }
 
 async function saveSet() {
@@ -1637,6 +1877,13 @@ onMounted(() => {
 .add-btn:hover {
   background: #667eea;
   color: white;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .delete-btn {
