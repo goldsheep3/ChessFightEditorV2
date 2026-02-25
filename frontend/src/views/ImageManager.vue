@@ -119,7 +119,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { setAPI } from '@/utils/api'
+import { galleryAPI } from '@/utils/api'
 import { useNotification } from '@/utils/notification'
 import ModalDialog from '@/components/ModalDialog.vue'
 
@@ -138,11 +138,7 @@ async function loadAllImages() {
   images.value = []
   
   try {
-    const response = await fetch(`/api/images/all`)
-    if (!response.ok) {
-      throw new Error('Failed to load images')
-    }
-    const data = await response.json()
+    const data = await galleryAPI.getAllImages()
     images.value = data.images || []
     loading.value = false
   } catch (err) {
@@ -182,7 +178,7 @@ async function uploadImages() {
   
   for (const file of selectedFiles.value) {
     try {
-      await setAPI.upload(folder, 'gallery', file)
+      await galleryAPI.uploadImage(folder, file)
       successCount++
     } catch (error) {
       console.error(`Failed to upload ${file.name}:`, error)

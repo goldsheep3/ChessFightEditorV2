@@ -73,3 +73,26 @@ export const globalAPI = {
     body: JSON.stringify(data)
   })
 }
+
+// Gallery image APIs
+export const galleryAPI = {
+  getAllImages: () => apiRequest('/api/global/images/all'),
+  
+  uploadImage: async (folder, file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    const response = await fetch(`/api/global/images/upload/${folder}`, {
+      method: 'POST',
+      body: formData
+    })
+    
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Upload failed')
+    }
+    
+    return data
+  }
+}
