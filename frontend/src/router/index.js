@@ -3,6 +3,7 @@ import Home from '@/views/Home.vue'
 import SetEditor from '@/views/SetEditor.vue'
 import GlobalEffects from '@/views/GlobalEffects.vue'
 import GlobalFixedTerms from '@/views/GlobalFixedTerms.vue'
+import ImageManager from '@/views/ImageManager.vue'
 import NotFound from '@/views/NotFound.vue'
 
 const routes = [
@@ -26,6 +27,11 @@ const routes = [
     path: '/global/fixed-terms',
     name: 'GlobalFixedTerms',
     component: GlobalFixedTerms
+  },
+  {
+    path: '/images',
+    name: 'ImageManager',
+    component: ImageManager
   },
   {
     path: '/:pathMatch(.*)*',

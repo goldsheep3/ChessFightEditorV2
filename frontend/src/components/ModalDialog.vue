@@ -224,6 +224,15 @@ export default {
   background: #d0d0d0;
 }
 
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
 /* Transition animations */
 .modal-fade-enter-active,
 .modal-fade-leave-active {

@@ -51,18 +51,16 @@
         <div class="effects-list">
           <div v-for="(effect, id) in effects" :key="id" :id="`effect-${id}`" class="effect-card">
             <div class="card-header">
-              <h4>{{ effect.name }} <span class="id-badge">({{ id }})</span></h4>
+              <h4>
+                <span :class="['alignment-badge', `alignment-${effect.alignment}`]">
+                  {{ getAlignmentLabel(effect.alignment) }}
+                </span>
+                {{ effect.name }} <span class="id-badge">({{ id }})</span>
+              </h4>
               <button class="edit-btn" @click="openEditModal(id, effect)">✏️ 编辑</button>
             </div>
-            <div class="effect-details">
-              <div class="detail-item">
-                <span class="detail-label">性质:</span>
-                <span class="detail-value">{{ getAlignmentLabel(effect.alignment) }}</span>
-              </div>
-              <div v-if="effect.note" class="detail-item">
-                <span class="detail-label">备注:</span>
-                <span class="detail-value">{{ effect.note }}</span>
-              </div>
+            <div v-if="effect.note" class="effect-description">
+              {{ effect.note }}
             </div>
           </div>
         </div>
@@ -139,9 +137,12 @@
           placeholder="效果备注（可选）"
         ></textarea>
       </div>
-      <div v-if="isEditMode" class="modal-actions">
-        <button class="btn-danger" @click="handleDeleteEffect">🗑️ 删除此效果</button>
-      </div>
+      <template #footer>
+        <button v-if="isEditMode" class="btn btn-danger" @click="handleDeleteEffect">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showEditModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveEffect">确定</button>
+      </template>
     </ModalDialog>
   </div>
 </template>
@@ -663,6 +664,41 @@ onMounted(() => {
 
 .help-content li {
   margin-bottom: 5px;
+}
+
+/* Alignment badge styles */
+.alignment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.alignment-positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.alignment-neutral {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.alignment-negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.effect-description {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* Responsive */

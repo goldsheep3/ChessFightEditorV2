@@ -24,6 +24,10 @@
             <span class="nav-icon">📌</span>
             <span>全局固词库</span>
           </div>
+          <div class="nav-item" @click="$router.push('/images')">
+            <span class="nav-icon">🖼️</span>
+            <span>图片管理器</span>
+          </div>
         </div>
       </div>
 

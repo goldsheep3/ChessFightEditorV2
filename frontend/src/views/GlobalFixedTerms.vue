@@ -54,11 +54,8 @@
               <h4>{{ term.name }} <span class="id-badge">({{ id }})</span></h4>
               <button class="edit-btn" @click="openEditModal(id, term)">✏️ 编辑</button>
             </div>
-            <div class="term-details">
-              <div v-if="term.note" class="detail-item">
-                <span class="detail-label">备注:</span>
-                <span class="detail-value">{{ term.note }}</span>
-              </div>
+            <div v-if="term.note" class="term-description">
+              {{ term.note }}
             </div>
           </div>
         </div>
@@ -127,9 +124,12 @@
           placeholder="固词备注（可选）"
         ></textarea>
       </div>
-      <div v-if="isEditMode" class="modal-actions">
-        <button class="btn-danger" @click="handleDeleteTerm">🗑️ 删除此固词</button>
-      </div>
+      <template #footer>
+        <button v-if="isEditMode" class="btn btn-danger" @click="handleDeleteTerm">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showEditModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveTerm">确定</button>
+      </template>
     </ModalDialog>
   </div>
 </template>
@@ -677,26 +677,14 @@ onMounted(() => {
   background: #5568d3;
 }
 
-.term-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.detail-item {
-  display: flex;
-  gap: 10px;
-}
-
-.detail-label {
-  font-weight: 600;
+.term-description {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
   color: #666;
-  min-width: 60px;
-}
-
-.detail-value {
-  color: #333;
-  flex: 1;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 /* Modal specific styles */
