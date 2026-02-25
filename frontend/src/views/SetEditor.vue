@@ -315,6 +315,18 @@
                   :class="{ modified: isFormFieldModified(form.id, 'name') }"
                 >
               </div>
+              <div class="form-group">
+                <label>稀有度:</label>
+                <select 
+                  v-model="form.rarity"
+                  :class="{ modified: isFormFieldModified(form.id, 'rarity') }"
+                >
+                  <option value="N">N</option>
+                  <option value="R">R</option>
+                  <option value="SR">SR</option>
+                  <option value="SSR">SSR</option>
+                </select>
+              </div>
               
               <!-- Display all stages (II and III) on the same page -->
               <template v-for="stage in form.stages" :key="`${form.id}-${stage.stage}`">
@@ -369,18 +381,6 @@
                         min="1"
                         :class="{ modified: isStageFieldModified(form.id, stage.stage, 'hp_limit') }"
                       >
-                    </div>
-                    <div class="form-group">
-                      <label>稀有度:</label>
-                      <select 
-                        v-model="stage.rarity"
-                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'rarity') }"
-                      >
-                        <option value="N">N</option>
-                        <option value="R">R</option>
-                        <option value="SR">SR</option>
-                        <option value="SSR">SSR</option>
-                      </select>
                     </div>
                   </div>
                   
@@ -460,10 +460,32 @@
           <h2>召唤物</h2>
           <div class="items-list">
             <p v-if="!setData.summons || setData.summons.length === 0" class="empty-hint">暂无召唤物</p>
-            <div v-for="(summon, index) in setData.summons" :key="index" class="card-item">
+            <div v-for="(summon, index) in setData.summons" :key="index" class="card-item-display">
               <div class="card-header">
                 <h4>{{ summon.name }} <span class="id-badge">({{ summon.id }})</span></h4>
-                <button class="delete-btn" @click="deleteSummon(index)">🗑️ 删除</button>
+                <button class="edit-btn" @click="openEditSummonModal(index)">✏️ 编辑</button>
+              </div>
+              <div class="card-info">
+                <div class="info-row">
+                  <span class="info-label">费用:</span>
+                  <span class="info-value">{{ summon.cost }}</span>
+                  <span class="info-label">移动:</span>
+                  <span class="info-value">{{ summon.move }}</span>
+                  <span class="info-label">攻击:</span>
+                  <span class="info-value">{{ summon.atk }}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">初始HP:</span>
+                  <span class="info-value">{{ summon.hp_init }}</span>
+                  <span class="info-label">最大HP:</span>
+                  <span class="info-value">{{ summon.hp_limit }}</span>
+                  <span class="info-label">稀有度:</span>
+                  <span class="info-value">{{ summon.rarity }}</span>
+                </div>
+                <div v-if="summon.text" class="info-row full">
+                  <span class="info-label">描述:</span>
+                  <span class="info-value">{{ summon.text }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -475,10 +497,26 @@
           <h2>建筑</h2>
           <div class="items-list">
             <p v-if="!setData.buildings || setData.buildings.length === 0" class="empty-hint">暂无建筑</p>
-            <div v-for="(building, index) in setData.buildings" :key="index" class="card-item">
+            <div v-for="(building, index) in setData.buildings" :key="index" class="card-item-display">
               <div class="card-header">
                 <h4>{{ building.name }} <span class="id-badge">({{ building.id }})</span></h4>
-                <button class="delete-btn" @click="deleteBuilding(index)">🗑️ 删除</button>
+                <button class="edit-btn" @click="openEditBuildingModal(index)">✏️ 编辑</button>
+              </div>
+              <div class="card-info">
+                <div class="info-row">
+                  <span class="info-label">费用:</span>
+                  <span class="info-value">{{ building.cost }}</span>
+                  <span class="info-label">初始HP:</span>
+                  <span class="info-value">{{ building.hp_init }}</span>
+                  <span class="info-label">最大HP:</span>
+                  <span class="info-value">{{ building.hp_limit }}</span>
+                  <span class="info-label">稀有度:</span>
+                  <span class="info-value">{{ building.rarity }}</span>
+                </div>
+                <div v-if="building.text" class="info-row full">
+                  <span class="info-label">描述:</span>
+                  <span class="info-value">{{ building.text }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -490,10 +528,22 @@
           <h2>攻击</h2>
           <div class="items-list">
             <p v-if="!setData.attacks || setData.attacks.length === 0" class="empty-hint">暂无攻击</p>
-            <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item">
+            <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item-display">
               <div class="card-header">
                 <h4>{{ attack.name }} <span class="id-badge">({{ attack.id }})</span></h4>
-                <button class="delete-btn" @click="deleteAttack(index)">🗑️ 删除</button>
+                <button class="edit-btn" @click="openEditAttackModal(index)">✏️ 编辑</button>
+              </div>
+              <div class="card-info">
+                <div class="info-row">
+                  <span class="info-label">费用:</span>
+                  <span class="info-value">{{ attack.cost }}</span>
+                  <span class="info-label">稀有度:</span>
+                  <span class="info-value">{{ attack.rarity }}</span>
+                </div>
+                <div v-if="attack.text" class="info-row full">
+                  <span class="info-label">描述:</span>
+                  <span class="info-value">{{ attack.text }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -505,10 +555,22 @@
           <h2>策略</h2>
           <div class="items-list">
             <p v-if="!setData.strategies || setData.strategies.length === 0" class="empty-hint">暂无策略</p>
-            <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item">
+            <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item-display">
               <div class="card-header">
                 <h4>{{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span></h4>
-                <button class="delete-btn" @click="deleteStrategy(index)">🗑️ 删除</button>
+                <button class="edit-btn" @click="openEditStrategyModal(index)">✏️ 编辑</button>
+              </div>
+              <div class="card-info">
+                <div class="info-row">
+                  <span class="info-label">费用:</span>
+                  <span class="info-value">{{ strategy.cost }}</span>
+                  <span class="info-label">稀有度:</span>
+                  <span class="info-value">{{ strategy.rarity }}</span>
+                </div>
+                <div v-if="strategy.text" class="info-row full">
+                  <span class="info-label">描述:</span>
+                  <span class="info-value">{{ strategy.text }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -588,6 +650,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI, globalAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
+import { useNotification } from '@/utils/notification'
 
 const props = defineProps({
   setCode: {
@@ -597,6 +660,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const notification = useNotification()
 const loading = ref(true)
 const error = ref(null)
 const setData = ref(null)
@@ -845,13 +909,13 @@ function addEffect() {
   try {
     validateId(effectId, '效果ID')
   } catch (err) {
-    alert(err.message)
+    notification.error(err.message)
     return
   }
   
   if (!setData.value.effects) setData.value.effects = {}
   if (setData.value.effects[effectId]) {
-    alert('该ID已存在！')
+    notification.error('该ID已存在！')
     return
   }
   
@@ -860,7 +924,7 @@ function addEffect() {
   
   const alignment = prompt('请输入性质 (positive/neutral/negative):')
   if (!ALIGNMENT_OPTIONS.includes(alignment)) {
-    alert('性质必须是 positive、neutral 或 negative')
+    notification.error('性质必须是 positive、neutral 或 negative')
     return
   }
   
@@ -884,13 +948,13 @@ function addFixedTerm() {
   try {
     validateId(termId, '固词ID')
   } catch (err) {
-    alert(err.message)
+    notification.error(err.message)
     return
   }
   
   if (!setData.value.fixed_terms) setData.value.fixed_terms = {}
   if (setData.value.fixed_terms[termId]) {
-    alert('该ID已存在！')
+    notification.error('该ID已存在！')
     return
   }
   
@@ -925,6 +989,7 @@ function addForm() {
   setData.value.forms.push({
     id: formId,
     name: formName,
+    rarity: "R",
     stages: [
       {
         stage: 2,
@@ -933,7 +998,6 @@ function addForm() {
         atk: 0,
         hp_init: 1,
         hp_limit: 1,
-        rarity: "R",
         image: "",
         icon: "",
         brast: "",
@@ -948,7 +1012,6 @@ function addForm() {
         atk: 0,
         hp_init: 1,
         hp_limit: 1,
-        rarity: "R",
         image: "",
         icon: "",
         brast: "",
@@ -1070,16 +1133,42 @@ function deleteStrategy(index) {
   setData.value.strategies.splice(index, 1)
 }
 
+// Placeholder edit functions for items - these open the item for editing
+// For now, they just navigate to the item, but can be enhanced with modals later
+function openEditSummonModal(index) {
+  activeTab.value = 'summons'
+  selectedItem.value = { type: 'summons', id: setData.value.summons[index].id }
+  notification.info('召唤物编辑功能开发中，请保存后在此界面编辑')
+}
+
+function openEditBuildingModal(index) {
+  activeTab.value = 'buildings'
+  selectedItem.value = { type: 'buildings', id: setData.value.buildings[index].id }
+  notification.info('建筑编辑功能开发中，请保存后在此界面编辑')
+}
+
+function openEditAttackModal(index) {
+  activeTab.value = 'attacks'
+  selectedItem.value = { type: 'attacks', id: setData.value.attacks[index].id }
+  notification.info('攻击编辑功能开发中，请保存后在此界面编辑')
+}
+
+function openEditStrategyModal(index) {
+  activeTab.value = 'strategies'
+  selectedItem.value = { type: 'strategies', id: setData.value.strategies[index].id }
+  notification.info('策略编辑功能开发中，请保存后在此界面编辑')
+}
+
 async function saveSet() {
   try {
     await setAPI.save(props.setCode, setData.value)
     // Update original data after successful save
     originalData.value = JSON.parse(JSON.stringify(setData.value))
     hasUnsavedChanges.value = false
-    alert('保存成功！')
+    notification.success('保存成功！')
   } catch (err) {
     console.error('Error saving set:', err)
-    alert('保存失败: ' + err.message)
+    notification.error('保存失败: ' + err.message)
   }
 }
 
@@ -1707,6 +1796,70 @@ onMounted(() => {
   color: #f59e0b;
   padding-left: 24px;
   font-weight: 500;
+}
+
+/* Styles for display-only cards */
+.card-item-display {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.card-item-display:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-item-display .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-item-display .edit-btn {
+  padding: 6px 12px;
+  border: none;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.card-item-display .edit-btn:hover {
+  background: #5568d3;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-row {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.info-row.full {
+  flex-direction: column;
+  gap: 5px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #666;
+  min-width: 60px;
+}
+
+.info-value {
+  color: #333;
 }
 
 /* Responsive */

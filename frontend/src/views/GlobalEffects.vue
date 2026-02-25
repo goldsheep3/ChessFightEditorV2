@@ -40,7 +40,7 @@
       <div class="center-panel">
         <div class="content-header">
           <h2>✨ 全局效果列表</h2>
-          <button class="add-btn" @click="addEffect">➕ 添加效果</button>
+          <button class="add-btn" @click="openAddModal">➕ 添加效果</button>
         </div>
 
         <div v-if="Object.keys(effects).length === 0" class="empty-state">
@@ -51,24 +51,16 @@
         <div class="effects-list">
           <div v-for="(effect, id) in effects" :key="id" :id="`effect-${id}`" class="effect-card">
             <div class="card-header">
-              <h4>{{ effect.name }} <span class="id-badge">({{ id }})</span></h4>
-              <button class="delete-btn" @click="deleteEffect(id)">🗑️ 删除</button>
+              <h4>
+                <span :class="['alignment-badge', `alignment-${effect.alignment}`]">
+                  {{ getAlignmentLabel(effect.alignment) }}
+                </span>
+                {{ effect.name }} <span class="id-badge">({{ id }})</span>
+              </h4>
+              <button class="edit-btn" @click="openEditModal(id, effect)">✏️ 编辑</button>
             </div>
-            <div class="form-group">
-              <label>名称:</label>
-              <input type="text" v-model="effect.name">
-            </div>
-            <div class="form-group">
-              <label>性质:</label>
-              <select v-model="effect.alignment">
-                <option value="positive">正面 (positive)</option>
-                <option value="neutral">中性 (neutral)</option>
-                <option value="negative">负面 (negative)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>备注:</label>
-              <textarea rows="2" v-model="effect.note"></textarea>
+            <div v-if="effect.note" class="effect-description">
+              {{ effect.note }}
             </div>
           </div>
         </div>
@@ -98,6 +90,60 @@
         </div>
       </div>
     </div>
+    
+    <!-- Edit/Add Effect Modal -->
+    <ModalDialog 
+      v-model="showEditModal" 
+      :title="isEditMode ? '✏️ 编辑效果' : '➕ 添加效果'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveEffect"
+    >
+      <div class="form-group">
+        <label>效果ID <span class="required">*</span></label>
+        <input 
+          v-model="editingEffect.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditMode"
+          @keyup.enter="handleSaveEffect"
+        >
+        <small v-if="!isEditMode" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingEffect.name" 
+          type="text" 
+          placeholder="效果名称"
+          @keyup.enter="handleSaveEffect"
+        >
+      </div>
+      <div class="form-group">
+        <label>性质</label>
+        <select v-model="editingEffect.alignment">
+          <option value="positive">正面 (positive)</option>
+          <option value="neutral">中性 (neutral)</option>
+          <option value="negative">负面 (negative)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="editingEffect.note" 
+          rows="3" 
+          placeholder="效果备注（可选）"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditMode" class="btn btn-danger" @click="handleDeleteEffect">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showEditModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveEffect">确定</button>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -106,11 +152,25 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { globalAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS } from '@/utils/validation'
+import { useNotification } from '@/utils/notification'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 const router = useRouter()
+const notification = useNotification()
 const loading = ref(true)
 const error = ref(null)
 const effects = ref({})
+
+// Modal state
+const showEditModal = ref(false)
+const isEditMode = ref(false)
+const editingEffect = ref({
+  id: '',
+  name: '',
+  alignment: 'neutral',
+  note: ''
+})
+const originalId = ref('')
 
 async function loadEffects() {
   try {
@@ -140,50 +200,103 @@ function scrollToEffect(id) {
   }
 }
 
-function addEffect() {
-  const effectId = prompt('请输入效果ID (小写字母、数字、下划线):')
-  if (!effectId) return
+function getAlignmentLabel(alignment) {
+  const labels = {
+    positive: '正面',
+    neutral: '中性',
+    negative: '负面'
+  }
+  return labels[alignment] || alignment
+}
+
+function openAddModal() {
+  isEditMode.value = false
+  editingEffect.value = {
+    id: '',
+    name: '',
+    alignment: 'neutral',
+    note: ''
+  }
+  originalId.value = ''
+  showEditModal.value = true
+}
+
+function openEditModal(id, effect) {
+  isEditMode.value = true
+  editingEffect.value = {
+    id: id,
+    name: effect.name,
+    alignment: effect.alignment,
+    note: effect.note || ''
+  }
+  originalId.value = id
+  showEditModal.value = true
+}
+
+async function handleSaveEffect() {
+  const { id, name, alignment, note } = editingEffect.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：效果ID和名称')
+    return
+  }
+  
+  // Validate ID for new effects
+  if (!isEditMode.value) {
+    try {
+      validateId(id, '效果ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (effects.value[id]) {
+      notification.error('该效果ID已存在！')
+      return
+    }
+  }
+  
+  effects.value[id] = {
+    name,
+    alignment,
+    note: note || ''
+  }
   
   try {
-    validateId(effectId, '效果ID')
+    await globalAPI.saveEffects({ effects: effects.value })
+    notification.success(isEditMode.value ? '效果已更新！' : '效果已添加！')
+    showEditModal.value = false
   } catch (err) {
-    alert(err.message)
-    return
-  }
-  
-  if (effects.value[effectId]) {
-    alert('该ID已存在！')
-    return
-  }
-  
-  const effectName = prompt('请输入效果名称:')
-  if (!effectName) return
-  
-  const alignment = prompt('请输入性质 (positive/neutral/negative):')
-  if (!ALIGNMENT_OPTIONS.includes(alignment)) {
-    alert('性质必须是 positive、neutral 或 negative')
-    return
-  }
-  
-  effects.value[effectId] = {
-    name: effectName,
-    alignment: alignment,
-    note: ""
+    console.error('Error saving effects:', err)
+    notification.error('保存失败: ' + err.message)
   }
 }
 
-function deleteEffect(id) {
-  if (!confirm('确定要删除此效果吗？')) return
+async function handleDeleteEffect() {
+  if (!confirm('确定要删除此效果吗？此操作无法撤销！')) {
+    return
+  }
+  
+  const id = originalId.value
   delete effects.value[id]
+  
+  try {
+    await globalAPI.saveEffects({ effects: effects.value })
+    notification.success('效果已删除！')
+    showEditModal.value = false
+  } catch (err) {
+    console.error('Error deleting effect:', err)
+    notification.error('删除失败: ' + err.message)
+  }
 }
 
 async function saveEffects() {
   try {
     await globalAPI.saveEffects({ effects: effects.value })
-    alert('保存成功！')
+    notification.success('保存成功！')
   } catch (err) {
     console.error('Error saving effects:', err)
-    alert('保存失败: ' + err.message)
+    notification.error('保存失败: ' + err.message)
   }
 }
 
@@ -553,6 +666,41 @@ onMounted(() => {
   margin-bottom: 5px;
 }
 
+/* Alignment badge styles */
+.alignment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.alignment-positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.alignment-neutral {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.alignment-negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.effect-description {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .main-content {
@@ -573,5 +721,78 @@ onMounted(() => {
   .right-panel {
     display: none;
   }
+}
+
+/* Additional styles for display-only mode */
+.edit-btn {
+  padding: 6px 12px;
+  border: none;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #5568d3;
+}
+
+.effect-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  gap: 10px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #666;
+  min-width: 60px;
+}
+
+.detail-value {
+  color: #333;
+  flex: 1;
+}
+
+/* Modal specific styles */
+.modal-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
 }
 </style>

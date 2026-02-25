@@ -24,6 +24,10 @@
             <span class="nav-icon">📌</span>
             <span>全局固词库</span>
           </div>
+          <div class="nav-item" @click="$router.push('/images')">
+            <span class="nav-icon">🖼️</span>
+            <span>图片管理器</span>
+          </div>
         </div>
       </div>
 
@@ -32,7 +36,7 @@
         <div class="content-section">
           <div class="section-header">
             <h2>📦 套组管理</h2>
-            <button class="primary-btn" @click="createNewSet">➕ 创建新套组</button>
+            <button class="primary-btn" @click="showCreateSetModal = true">➕ 创建新套组</button>
           </div>
 
           <div v-if="sets.length === 0" class="empty-state">
@@ -74,17 +78,21 @@
 
         <div class="quick-actions">
           <h3>⚡ 快速操作</h3>
-          <button class="action-btn" @click="$router.push('/global/effects')">
+          <button class="action-btn" @click="showCreateSetModal = true">
+            <span class="action-icon">➕</span>
+            <span>快捷创建套组</span>
+          </button>
+          <button class="action-btn" @click="showAddEffectModal = true">
             <span class="action-icon">✨</span>
-            <span>编辑全局效果库</span>
+            <span>添加全局效果</span>
           </button>
-          <button class="action-btn" @click="$router.push('/global/fixed-terms')">
+          <button class="action-btn" @click="showAddTermModal = true">
             <span class="action-icon">📌</span>
-            <span>编辑全局固词库</span>
+            <span>添加全局固词</span>
           </button>
-          <button class="action-btn" @click="showImageGallery = true">
+          <button class="action-btn" @click="showImageUploadModal = true">
             <span class="action-icon">🖼️</span>
-            <span>图片资源管理</span>
+            <span>上传图片</span>
           </button>
         </div>
 
@@ -102,75 +110,246 @@
       </div>
     </div>
     
-    <!-- Image Gallery Modal -->
-    <div v-if="showImageGallery" class="modal-overlay" @click="showImageGallery = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>🖼️ 图片资源管理</h2>
-          <button class="close-btn" @click="showImageGallery = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <div class="upload-section">
-            <h3>上传新图片</h3>
-            <div class="upload-form">
-              <div class="form-group">
-                <label>选择套组:</label>
-                <select v-model="selectedSetForUpload">
-                  <option value="global">全局图片</option>
-                  <option v-for="set in sets" :key="set.set_code" :value="set.set_code">
-                    {{ set.name }} ({{ set.set_code }})
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>选择图片文件:</label>
-                <input type="file" accept="image/*" multiple @change="handleFileSelect" ref="fileInput">
-              </div>
-              <button class="primary-btn" @click="uploadImages" :disabled="!selectedFiles.length">
-                ⬆️ 上传 {{ selectedFiles.length > 0 ? `(${selectedFiles.length}个文件)` : '' }}
-              </button>
-            </div>
-          </div>
-          
-          <div class="gallery-section">
-            <h3>已上传的图片</h3>
-            <div class="set-selector">
-              <button 
-                v-for="set in ['global', ...sets.map(s => s.set_code)]" 
-                :key="set"
-                :class="['set-tab', { active: selectedSetForView === set }]"
-                @click="selectedSetForView = set; loadImages(set)"
-              >
-                {{ set === 'global' ? '全局' : sets.find(s => s.set_code === set)?.name || set }}
-              </button>
-            </div>
-            <div class="image-grid">
-              <div v-if="loadingImages" class="loading-text">加载中...</div>
-              <div v-else-if="images.length === 0" class="empty-text">该目录下暂无图片</div>
-              <div v-for="(img, index) in images" :key="index" class="image-item">
-                <img :src="img.url" :alt="img.name" @click="copyImagePath(img.url)">
-                <div class="image-name" :title="img.name">{{ img.name }}</div>
-                <div class="image-path" :title="img.url">{{ img.url }}</div>
-              </div>
-            </div>
-          </div>
+    <!-- Create Set Modal -->
+    <ModalDialog 
+      v-model="showCreateSetModal" 
+      title="➕ 创建新套组"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleCreateSet"
+    >
+      <div class="form-group">
+        <label>套组代码 <span class="required">*</span></label>
+        <input 
+          v-model="newSet.setCode" 
+          type="text" 
+          placeholder="英文、数字、下划线"
+          @keyup.enter="handleCreateSet"
+        >
+        <small class="form-hint">用于标识套组的唯一代码</small>
+      </div>
+      <div class="form-group">
+        <label>套组名称 <span class="required">*</span></label>
+        <input 
+          v-model="newSet.name" 
+          type="text" 
+          placeholder="套组显示名称"
+          @keyup.enter="handleCreateSet"
+        >
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea 
+          v-model="newSet.description" 
+          rows="3" 
+          placeholder="套组的简要描述（可选）"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="newSet.notes" 
+          rows="2" 
+          placeholder="开发备注（可选）"
+        ></textarea>
+      </div>
+    </ModalDialog>
+
+    <!-- Add Global Effect Modal -->
+    <ModalDialog 
+      v-model="showAddEffectModal" 
+      title="✨ 添加全局效果"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleAddEffect"
+    >
+      <div class="form-group">
+        <label>效果ID <span class="required">*</span></label>
+        <input 
+          v-model="newEffect.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          @keyup.enter="handleAddEffect"
+        >
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="newEffect.name" 
+          type="text" 
+          placeholder="效果名称"
+          @keyup.enter="handleAddEffect"
+        >
+      </div>
+      <div class="form-group">
+        <label>性质</label>
+        <select v-model="newEffect.alignment">
+          <option value="positive">正面 (positive)</option>
+          <option value="neutral">中性 (neutral)</option>
+          <option value="negative">负面 (negative)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="newEffect.note" 
+          rows="2" 
+          placeholder="效果备注（可选）"
+        ></textarea>
+      </div>
+    </ModalDialog>
+
+    <!-- Add Global Fixed Term Modal -->
+    <ModalDialog 
+      v-model="showAddTermModal" 
+      title="📌 添加全局固词"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleAddTerm"
+    >
+      <div class="form-group">
+        <label>固词ID <span class="required">*</span></label>
+        <input 
+          v-model="newTerm.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          @keyup.enter="handleAddTerm"
+        >
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="newTerm.name" 
+          type="text" 
+          placeholder="固词名称"
+          @keyup.enter="handleAddTerm"
+        >
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="newTerm.note" 
+          rows="2" 
+          placeholder="固词备注（可选）"
+        ></textarea>
+      </div>
+    </ModalDialog>
+
+    <!-- Image Upload Modal -->
+    <ModalDialog 
+      v-model="showImageUploadModal" 
+      title="🖼️ 上传图片"
+      size="large"
+    >
+      <div class="form-group">
+        <label>归档文件夹</label>
+        <input 
+          v-model="imageFolder" 
+          type="text" 
+          placeholder="输入文件夹名（0-9a-z-_），留空则存于根目录"
+          pattern="[0-9a-z_-]*"
+        >
+        <small class="form-hint">仅支持小写字母、数字、下划线和连字符</small>
+      </div>
+      <div class="form-group">
+        <label>选择图片文件</label>
+        <input 
+          type="file" 
+          accept="image/*" 
+          multiple 
+          @change="handleFileSelect" 
+          ref="fileInput"
+        >
+      </div>
+      <div v-if="selectedFiles.length > 0" class="selected-files">
+        <p><strong>已选择 {{ selectedFiles.length }} 个文件：</strong></p>
+        <ul>
+          <li v-for="(file, i) in selectedFiles" :key="i">{{ file.name }}</li>
+        </ul>
+      </div>
+      <template #footer>
+        <button class="btn btn-secondary" @click="showImageUploadModal = false">取消</button>
+        <button 
+          class="btn btn-primary" 
+          @click="uploadImages" 
+          :disabled="selectedFiles.length === 0"
+        >
+          ⬆️ 上传 {{ selectedFiles.length > 0 ? `(${selectedFiles.length}个文件)` : '' }}
+        </button>
+      </template>
+    </ModalDialog>
+
+    <!-- Image Gallery Modal (View Only) -->
+    <ModalDialog 
+      v-model="showImageGallery" 
+      title="🖼️ 图片库"
+      size="full"
+    >
+      <div class="gallery-actions">
+        <button class="primary-btn" @click="openImageUpload">➕ 上传图片</button>
+      </div>
+      
+      <div class="image-grid">
+        <div v-if="loadingImages" class="loading-text">加载中...</div>
+        <div v-else-if="images.length === 0" class="empty-text">暂无图片</div>
+        <div v-for="(img, index) in images" :key="index" class="image-item">
+          <img :src="img.url" :alt="img.name" @click="copyImagePath(img.url)">
+          <div class="image-name" :title="img.name">{{ img.name }}</div>
+          <div class="image-path" :title="img.url">{{ img.url }}</div>
         </div>
       </div>
-    </div>
+    </ModalDialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { setAPI } from '@/utils/api'
-import { validateSetCode } from '@/utils/validation'
+import { setAPI, globalAPI } from '@/utils/api'
+import { validateSetCode, validateId } from '@/utils/validation'
+import { useNotification } from '@/utils/notification'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 const router = useRouter()
+const notification = useNotification()
 const sets = ref([])
+
+// Modal states
+const showCreateSetModal = ref(false)
+const showAddEffectModal = ref(false)
+const showAddTermModal = ref(false)
+const showImageUploadModal = ref(false)
 const showImageGallery = ref(false)
-const selectedSetForUpload = ref('global')
-const selectedSetForView = ref('global')
+
+// Form data
+const newSet = ref({
+  setCode: '',
+  name: '',
+  description: '',
+  notes: ''
+})
+
+const newEffect = ref({
+  id: '',
+  name: '',
+  alignment: 'neutral',
+  note: ''
+})
+
+const newTerm = ref({
+  id: '',
+  name: '',
+  note: ''
+})
+
+// Image upload
+const imageFolder = ref('')
 const selectedFiles = ref([])
 const fileInput = ref(null)
 const images = ref([])
@@ -182,30 +361,42 @@ async function loadSets() {
     sets.value = data.sets
   } catch (error) {
     console.error('Error loading sets:', error)
-    alert('加载套组列表失败')
+    notification.error('加载套组列表失败')
   }
 }
 
-function createNewSet() {
-  const setCode = prompt('请输入新套组的代码 (英文、数字、下划线):')
+function resetNewSetForm() {
+  newSet.value = {
+    setCode: '',
+    name: '',
+    description: '',
+    notes: ''
+  }
+}
+
+async function handleCreateSet() {
+  const { setCode, name, description, notes } = newSet.value
   
-  if (!setCode) return
+  if (!setCode || !name) {
+    notification.error('请填写必填项：套组代码和名称')
+    return
+  }
   
   // Validate set code
   try {
     validateSetCode(setCode)
   } catch (error) {
-    alert(error.message)
+    notification.error(error.message)
     return
   }
   
   // Create a minimal valid set
-  const newSet = {
+  const newSetData = {
     schema_version: 2,
-    name: setCode,
+    name: name,
     set_code: setCode,
-    description: "",
-    notes: "",
+    description: description || '',
+    notes: notes || '',
     archetypes: [],
     designers: [],
     effects: {},
@@ -214,6 +405,7 @@ function createNewSet() {
       {
         id: "default",
         name: "默认形态",
+        rarity: "R",
         stages: [
           {
             stage: 1,
@@ -222,7 +414,6 @@ function createNewSet() {
             atk: 0,
             hp_init: 1,
             hp_limit: 1,
-            rarity: "R",
             image: "",
             icon: "",
             brast: "",
@@ -239,51 +430,159 @@ function createNewSet() {
     strategies: []
   }
   
-  // Save the new set
-  setAPI.save(setCode, newSet)
-    .then(() => {
-      alert('套组创建成功！')
-      router.push(`/editor/${setCode}`)
-    })
-    .catch(error => {
-      alert('创建失败: ' + (error.message || '未知错误'))
-    })
+  try {
+    await setAPI.save(setCode, newSetData)
+    notification.success('套组创建成功！')
+    showCreateSetModal.value = false
+    resetNewSetForm()
+    router.push(`/editor/${setCode}`)
+  } catch (error) {
+    notification.error('创建失败: ' + (error.message || '未知错误'))
+  }
 }
 
 async function deleteSet(setCode) {
+  // Use a custom confirm modal would be better, but for now use the browser confirm
   if (!confirm(`确定要删除套组 ${setCode} 吗？此操作无法撤销！`)) {
     return
   }
   
   try {
     await setAPI.delete(setCode)
-    alert('套组已删除')
+    notification.success('套组已删除')
     loadSets()
   } catch (error) {
     console.error('Error deleting set:', error)
-    alert('删除套组失败: ' + error.message)
+    notification.error('删除套组失败: ' + error.message)
   }
 }
 
-// Image gallery functions
+// Global Effect functions
+function resetNewEffectForm() {
+  newEffect.value = {
+    id: '',
+    name: '',
+    alignment: 'neutral',
+    note: ''
+  }
+}
+
+async function handleAddEffect() {
+  const { id, name, alignment, note } = newEffect.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：效果ID和名称')
+    return
+  }
+  
+  try {
+    validateId(id, '效果ID')
+  } catch (error) {
+    notification.error(error.message)
+    return
+  }
+  
+  try {
+    const data = await globalAPI.getEffects()
+    const effects = data.effects || {}
+    
+    if (effects[id]) {
+      notification.error('该效果ID已存在！')
+      return
+    }
+    
+    effects[id] = {
+      name,
+      alignment,
+      note: note || ''
+    }
+    
+    await globalAPI.saveEffects({ effects })
+    notification.success('全局效果添加成功！')
+    showAddEffectModal.value = false
+    resetNewEffectForm()
+  } catch (error) {
+    notification.error('添加失败: ' + (error.message || '未知错误'))
+  }
+}
+
+// Global Fixed Term functions
+function resetNewTermForm() {
+  newTerm.value = {
+    id: '',
+    name: '',
+    note: ''
+  }
+}
+
+async function handleAddTerm() {
+  const { id, name, note } = newTerm.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：固词ID和名称')
+    return
+  }
+  
+  try {
+    validateId(id, '固词ID')
+  } catch (error) {
+    notification.error(error.message)
+    return
+  }
+  
+  try {
+    const data = await globalAPI.getFixedTerms()
+    const fixed_terms = data.fixed_terms || {}
+    
+    if (fixed_terms[id]) {
+      notification.error('该固词ID已存在！')
+      return
+    }
+    
+    fixed_terms[id] = {
+      name,
+      note: note || ''
+    }
+    
+    await globalAPI.saveFixedTerms({ fixed_terms })
+    notification.success('全局固词添加成功！')
+    showAddTermModal.value = false
+    resetNewTermForm()
+  } catch (error) {
+    notification.error('添加失败: ' + (error.message || '未知错误'))
+  }
+}
+
+// Image functions
 function handleFileSelect(event) {
   selectedFiles.value = Array.from(event.target.files)
 }
 
+function openImageUpload() {
+  showImageGallery.value = false
+  showImageUploadModal.value = true
+}
+
 async function uploadImages() {
   if (selectedFiles.value.length === 0) {
-    alert('请先选择要上传的文件')
+    notification.error('请先选择要上传的文件')
     return
   }
   
-  const setCode = selectedSetForUpload.value
+  // Validate folder name if provided
+  if (imageFolder.value && !/^[0-9a-z_-]*$/.test(imageFolder.value)) {
+    notification.error('文件夹名只能包含小写字母、数字、下划线和连字符')
+    return
+  }
+  
+  const folder = imageFolder.value || 'root'
   let successCount = 0
   let failCount = 0
   
   for (const file of selectedFiles.value) {
     try {
-      // Use a generic field name for gallery uploads
-      await setAPI.upload(setCode, 'gallery', file)
+      // Upload to folder-based structure instead of set-based
+      await setAPI.upload(folder, 'gallery', file)
       successCount++
     } catch (error) {
       console.error(`Failed to upload ${file.name}:`, error)
@@ -291,26 +590,27 @@ async function uploadImages() {
     }
   }
   
-  alert(`上传完成！成功: ${successCount}，失败: ${failCount}`)
+  notification.success(`上传完成！成功: ${successCount}，失败: ${failCount}`)
   
-  // Clear selection and reload images
+  // Clear selection
   selectedFiles.value = []
+  imageFolder.value = ''
   if (fileInput.value) {
     fileInput.value.value = ''
   }
   
-  // Reload images for current set
-  if (selectedSetForView.value === setCode) {
-    loadImages(setCode)
-  }
+  showImageUploadModal.value = false
+  
+  // Load all images
+  loadAllImages()
 }
 
-async function loadImages(setCode) {
+async function loadAllImages() {
   loadingImages.value = true
   images.value = []
   
   try {
-    const response = await fetch(`/api/set/images/${setCode}`)
+    const response = await fetch(`/api/images/all`)
     if (!response.ok) {
       throw new Error('Failed to load images')
     }
@@ -318,7 +618,7 @@ async function loadImages(setCode) {
     images.value = data.images || []
   } catch (error) {
     console.error('Error loading images:', error)
-    alert('加载图片列表失败: ' + error.message)
+    notification.error('加载图片列表失败: ' + error.message)
   } finally {
     loadingImages.value = false
   }
@@ -326,10 +626,10 @@ async function loadImages(setCode) {
 
 function copyImagePath(url) {
   navigator.clipboard.writeText(url).then(() => {
-    alert(`已复制图片路径: ${url}`)
+    notification.success(`已复制图片路径: ${url}`)
   }).catch(err => {
     console.error('Failed to copy:', err)
-    alert('复制失败，请手动复制')
+    notification.error('复制失败，请手动复制')
   })
 }
 
@@ -860,5 +1160,81 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Form styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.selected-files {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.selected-files ul {
+  margin: 10px 0 0 20px;
+  padding: 0;
+}
+
+.selected-files li {
+  margin-bottom: 5px;
+  color: #666;
+  font-size: 13px;
+}
+
+.gallery-actions {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
