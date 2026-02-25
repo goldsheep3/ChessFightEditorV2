@@ -424,24 +424,30 @@
                   
                   <div class="form-group">
                     <label>绑定效果 (多个用逗号分隔):</label>
-                    <input 
-                      type="text" 
-                      :value="(stage.bound_effects || []).join(', ')"
-                      @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                      placeholder="例如: effect1, effect2"
-                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
-                    >
+                    <div class="input-with-button">
+                      <input 
+                        type="text" 
+                        :value="(stage.bound_effects || []).join(', ')"
+                        @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        placeholder="例如: effect1, effect2"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
+                      >
+                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                    </div>
                   </div>
                   
                   <div class="form-group">
                     <label>绑定固词 (多个用逗号分隔):</label>
-                    <input 
-                      type="text" 
-                      :value="(stage.bound_fixed_terms || []).join(', ')"
-                      @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                      placeholder="例如: term1, term2"
-                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
-                    >
+                    <div class="input-with-button">
+                      <input 
+                        type="text" 
+                        :value="(stage.bound_fixed_terms || []).join(', ')"
+                        @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        placeholder="例如: term1, term2"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
+                      >
+                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                    </div>
                   </div>
                 </div>
               </template>
@@ -525,9 +531,51 @@
         </div>
         
         <div class="effects-display-section">
-          <h3>绑定效果/固词</h3>
+          <h3>绑定效果/固词验证</h3>
           <div class="effects-list">
-            <p class="hint">当前页面处理的效果和固词描述将显示在这里</p>
+            <div v-if="boundItemsValidation.effects.length === 0 && boundItemsValidation.terms.length === 0" class="hint">
+              点击"🔄"按钮验证绑定的效果和固词
+            </div>
+            
+            <!-- Display bound effects -->
+            <div v-if="boundItemsValidation.effects.length > 0">
+              <h4>绑定效果:</h4>
+              <div v-for="item in boundItemsValidation.effects" :key="item.id" class="validation-item" :class="{ 'not-found': !item.exists }">
+                <div class="validation-header">
+                  <span class="validation-icon">{{ item.exists ? '✅' : '❌' }}</span>
+                  <strong>{{ item.id }}</strong>
+                  <span v-if="item.isGlobal" class="global-badge">全局</span>
+                  <span v-else-if="item.exists" class="local-badge">局部</span>
+                </div>
+                <div v-if="item.exists" class="validation-body">
+                  <p><strong>名称:</strong> {{ item.name }}</p>
+                  <p v-if="item.note"><strong>备注:</strong> {{ item.note }}</p>
+                </div>
+                <div v-else class="validation-error">
+                  ⚠️ 效果不存在！请检查ID是否正确。
+                </div>
+              </div>
+            </div>
+            
+            <!-- Display bound terms -->
+            <div v-if="boundItemsValidation.terms.length > 0" style="margin-top: 15px;">
+              <h4>绑定固词:</h4>
+              <div v-for="item in boundItemsValidation.terms" :key="item.id" class="validation-item" :class="{ 'not-found': !item.exists }">
+                <div class="validation-header">
+                  <span class="validation-icon">{{ item.exists ? '✅' : '❌' }}</span>
+                  <strong>{{ item.id }}</strong>
+                  <span v-if="item.isGlobal" class="global-badge">全局</span>
+                  <span v-else-if="item.exists" class="local-badge">局部</span>
+                </div>
+                <div v-if="item.exists" class="validation-body">
+                  <p><strong>名称:</strong> {{ item.name }}</p>
+                  <p v-if="item.note"><strong>备注:</strong> {{ item.note }}</p>
+                </div>
+                <div v-else class="validation-error">
+                  ⚠️ 固词不存在！请检查ID是否正确。
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -538,7 +586,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { setAPI } from '@/utils/api'
+import { setAPI, globalAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
 
 const props = defineProps({
@@ -556,6 +604,9 @@ const originalData = ref(null) // Store original data for change detection
 const activeTab = ref('basic')
 const selectedItem = ref({ type: 'basic', id: null, stage: null }) // Track selected item in tree
 const hasUnsavedChanges = ref(false)
+const boundItemsValidation = ref({ effects: [], terms: [] }) // Store validation results for bound items
+const globalEffects = ref({}) // Global effects library
+const globalFixedTerms = ref({}) // Global fixed terms library
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -595,6 +646,89 @@ async function loadSet() {
     error.value = '加载套组失败'
     loading.value = false
   }
+}
+
+async function loadGlobalLibraries() {
+  try {
+    const [effectsData, termsData] = await Promise.all([
+      globalAPI.getEffects(),
+      globalAPI.getFixedTerms()
+    ])
+    globalEffects.value = effectsData.effects || {}
+    globalFixedTerms.value = termsData.fixed_terms || {}
+  } catch (err) {
+    console.error('Error loading global libraries:', err)
+  }
+}
+
+// Validate bound effects and terms for current stage
+function validateBoundItems(boundEffects, boundTerms) {
+  const results = { effects: [], terms: [] }
+  
+  // Validate effects
+  if (boundEffects && boundEffects.length > 0) {
+    boundEffects.forEach(effectId => {
+      const exists = globalEffects.value[effectId] || setData.value?.effects?.[effectId]
+      results.effects.push({
+        id: effectId,
+        exists,
+        name: exists ? (globalEffects.value[effectId]?.name || setData.value?.effects?.[effectId]?.name) : null,
+        isGlobal: !!globalEffects.value[effectId],
+        note: exists ? (globalEffects.value[effectId]?.note || setData.value?.effects?.[effectId]?.note) : null
+      })
+    })
+  }
+  
+  // Validate terms
+  if (boundTerms && boundTerms.length > 0) {
+    boundTerms.forEach(termId => {
+      const exists = globalFixedTerms.value[termId] || setData.value?.fixed_terms?.[termId]
+      results.terms.push({
+        id: termId,
+        exists,
+        name: exists ? (globalFixedTerms.value[termId]?.name || setData.value?.fixed_terms?.[termId]?.name) : null,
+        isGlobal: !!globalFixedTerms.value[termId],
+        note: exists ? (globalFixedTerms.value[termId]?.note || setData.value?.fixed_terms?.[termId]?.note) : null
+      })
+    })
+  }
+  
+  boundItemsValidation.value = results
+  return results
+}
+
+// Get current stage data for validation
+function getCurrentStageBoundItems() {
+  if (activeTab.value !== 'forms' || !selectedItem.value.id) {
+    return { effects: [], terms: [] }
+  }
+  
+  const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
+  if (!form) return { effects: [], terms: [] }
+  
+  // Collect all bound items from all stages
+  const allEffects = []
+  const allTerms = []
+  
+  form.stages?.forEach(stage => {
+    if (stage.bound_effects) {
+      allEffects.push(...stage.bound_effects)
+    }
+    if (stage.bound_fixed_terms) {
+      allTerms.push(...stage.bound_fixed_terms)
+    }
+  })
+  
+  return {
+    effects: [...new Set(allEffects)], // Remove duplicates
+    terms: [...new Set(allTerms)]
+  }
+}
+
+// Refresh validation for current form
+function refreshBoundItemsValidation() {
+  const { effects, terms } = getCurrentStageBoundItems()
+  validateBoundItems(effects, terms)
 }
 
 function goBack() {
@@ -962,6 +1096,7 @@ watch(
 
 onMounted(() => {
   loadSet()
+  loadGlobalLibraries()
 })
 </script>
 
@@ -1393,6 +1528,39 @@ onMounted(() => {
   background: #c0392b;
 }
 
+/* Input with Button */
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+.refresh-btn {
+  padding: 8px 16px;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refresh-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.refresh-btn:active {
+  transform: rotate(180deg) scale(0.95);
+}
+
 /* Right Panel */
 .right-panel {
   background: white;
@@ -1471,6 +1639,74 @@ onMounted(() => {
   text-align: center;
   font-style: italic;
   font-size: 14px;
+}
+
+.effects-list h4 {
+  color: #2c3e50;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.validation-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.validation-item.not-found {
+  border-color: #f59e0b;
+  background: #fffbea;
+}
+
+.validation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.validation-icon {
+  font-size: 16px;
+}
+
+.global-badge, .local-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.global-badge {
+  background: #667eea;
+  color: white;
+}
+
+.local-badge {
+  background: #10b981;
+  color: white;
+}
+
+.validation-body {
+  font-size: 13px;
+  color: #666;
+  padding-left: 24px;
+}
+
+.validation-body p {
+  margin: 4px 0;
+}
+
+.validation-error {
+  font-size: 13px;
+  color: #f59e0b;
+  padding-left: 24px;
+  font-weight: 500;
 }
 
 /* Responsive */
