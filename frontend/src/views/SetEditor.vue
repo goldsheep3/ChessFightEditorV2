@@ -33,15 +33,12 @@
             <div class="tree-children">
               <template v-for="(form, index) in setData.forms" :key="form.id">
                 <div 
-                  v-for="stage in form.stages" 
-                  :key="`${form.id}-${stage.stage}`"
                   class="tree-item child"
-                  :class="{ active: activeTab === 'forms' && selectedItem.id === form.id && selectedItem.stage === stage.stage }"
-                  @click="selectFormStage(form.id, stage.stage)"
+                  :class="{ active: activeTab === 'forms' && selectedItem.id === form.id }"
+                  @click="selectForm(form.id)"
                 >
                   <span class="tree-icon">◆</span>
                   <span class="tree-text">
-                    <span class="badge stage-badge">{{ toRoman(stage.stage) }}</span>
                     {{ form.name }}
                   </span>
                 </div>
@@ -273,146 +270,75 @@
         </div>
 
         <!-- Forms Tab -->
-        <div v-if="activeTab === 'forms' && selectedItem.id && selectedItem.stage" class="edit-section">
+        <div v-if="activeTab === 'forms' && selectedItem.id" class="edit-section">
           <template v-for="form in setData.forms" :key="form.id">
             <template v-if="form.id === selectedItem.id">
+              <h2>{{ form.name }}</h2>
+              
+              <!-- Shared basic info (ID and Name shown only once) -->
+              <h3>基础信息 (所有阶段共享)</h3>
+              <div class="form-group">
+                <label>形态ID:</label>
+                <input type="text" :value="form.id" readonly>
+              </div>
+              <div class="form-group">
+                <label>形态名称:</label>
+                <input type="text" v-model="form.name" placeholder="输入形态名称">
+              </div>
+              
+              <!-- Display all stages (II and III) on the same page -->
               <template v-for="stage in form.stages" :key="`${form.id}-${stage.stage}`">
-                <div v-if="stage.stage === selectedItem.stage">
-                  <h2>{{ form.name }} - 【{{ toRoman(stage.stage) }}】阶</h2>
-                  
-                  <!-- Stage 1 and 2: Can edit name and all properties -->
-                  <template v-if="stage.stage !== 3">
-                    <h3>基础信息 (所有阶段共享)</h3>
-                    <div class="form-group">
-                      <label>形态ID:</label>
-                      <input type="text" :value="form.id" readonly>
-                    </div>
-                    <div class="form-group">
-                      <label>形态名称:</label>
-                      <input type="text" v-model="form.name" placeholder="输入形态名称">
-                    </div>
-                  </template>
-                  
-                  <!-- Stage 3: Cannot edit name (read-only) -->
-                  <template v-else>
-                    <h3>基础信息 (所有阶段共享，不可编辑)</h3>
-                    <div class="form-group">
-                      <label>形态ID:</label>
-                      <input type="text" :value="form.id" readonly>
-                    </div>
-                    <div class="form-group">
-                      <label>形态名称:</label>
-                      <input type="text" :value="form.name" readonly disabled>
-                      <p class="hint-text">提示：形态名称只能在【II】阶编辑</p>
-                    </div>
-                  </template>
-                  
-                  <!-- Common fields for all stages, but editable differently -->
+                <div class="stage-section">
                   <h3>【{{ toRoman(stage.stage) }}】阶属性</h3>
                   
-                  <!-- For stage 1 and 2: All fields editable -->
-                  <!-- For stage 3: Only text, effects, and fixed terms editable -->
-                  <template v-if="stage.stage !== 3">
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>消耗:</label>
-                        <input type="number" v-model.number="stage.cost" min="0">
-                      </div>
-                      <div class="form-group">
-                        <label>移动:</label>
-                        <input type="number" v-model.number="stage.move" min="0">
-                      </div>
-                      <div class="form-group">
-                        <label>攻击:</label>
-                        <input type="number" v-model.number="stage.atk" min="0">
-                      </div>
-                    </div>
-                    
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>初始HP:</label>
-                        <input type="number" v-model.number="stage.hp_init" min="1">
-                      </div>
-                      <div class="form-group">
-                        <label>HP上限:</label>
-                        <input type="number" v-model.number="stage.hp_limit" min="1">
-                      </div>
-                      <div class="form-group">
-                        <label>稀有度:</label>
-                        <select v-model="stage.rarity">
-                          <option value="N">N</option>
-                          <option value="R">R</option>
-                          <option value="SR">SR</option>
-                          <option value="SSR">SSR</option>
-                        </select>
-                      </div>
-                    </div>
-                    
+                  <div class="form-row">
                     <div class="form-group">
-                      <label>图片URL:</label>
-                      <input type="text" v-model="stage.image" placeholder="图片地址">
+                      <label>消耗:</label>
+                      <input type="number" v-model.number="stage.cost" min="0">
                     </div>
                     <div class="form-group">
-                      <label>图标URL:</label>
-                      <input type="text" v-model="stage.icon" placeholder="图标地址">
+                      <label>移动:</label>
+                      <input type="number" v-model.number="stage.move" min="0">
                     </div>
                     <div class="form-group">
-                      <label>爆裂值:</label>
-                      <input type="text" v-model="stage.brast" placeholder="爆裂值">
+                      <label>攻击:</label>
+                      <input type="number" v-model.number="stage.atk" min="0">
                     </div>
-                  </template>
+                  </div>
                   
-                  <!-- Stage 3: Show read-only stats -->
-                  <template v-else>
-                    <div class="readonly-section">
-                      <p class="hint-text">提示：以下数值属性只能在【II】阶编辑</p>
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label>消耗:</label>
-                          <input type="number" :value="stage.cost" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>移动:</label>
-                          <input type="number" :value="stage.move" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>攻击:</label>
-                          <input type="number" :value="stage.atk" readonly disabled>
-                        </div>
-                      </div>
-                      
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label>初始HP:</label>
-                          <input type="number" :value="stage.hp_init" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>HP上限:</label>
-                          <input type="number" :value="stage.hp_limit" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>稀有度:</label>
-                          <input type="text" :value="stage.rarity" readonly disabled>
-                        </div>
-                      </div>
-                      
-                      <div class="form-group">
-                        <label>图片URL:</label>
-                        <input type="text" :value="stage.image" readonly disabled>
-                      </div>
-                      <div class="form-group">
-                        <label>图标URL:</label>
-                        <input type="text" :value="stage.icon" readonly disabled>
-                      </div>
-                      <div class="form-group">
-                        <label>爆裂值:</label>
-                        <input type="text" :value="stage.brast" readonly disabled>
-                      </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>初始HP:</label>
+                      <input type="number" v-model.number="stage.hp_init" min="1">
                     </div>
-                  </template>
+                    <div class="form-group">
+                      <label>HP上限:</label>
+                      <input type="number" v-model.number="stage.hp_limit" min="1">
+                    </div>
+                    <div class="form-group">
+                      <label>稀有度:</label>
+                      <select v-model="stage.rarity">
+                        <option value="N">N</option>
+                        <option value="R">R</option>
+                        <option value="SR">SR</option>
+                        <option value="SSR">SSR</option>
+                      </select>
+                    </div>
+                  </div>
                   
-                  <!-- Text, effects, and fixed terms: Always editable -->
-                  <h3>描述与效果 (可编辑)</h3>
+                  <div class="form-group">
+                    <label>图片URL:</label>
+                    <input type="text" v-model="stage.image" placeholder="图片地址">
+                  </div>
+                  <div class="form-group">
+                    <label>图标URL:</label>
+                    <input type="text" v-model="stage.icon" placeholder="图标地址">
+                  </div>
+                  <div class="form-group">
+                    <label>爆裂值:</label>
+                    <input type="text" v-model="stage.brast" placeholder="爆裂值">
+                  </div>
+                  
                   <div class="form-group">
                     <label>描述文本:</label>
                     <textarea v-model="stage.text" rows="4" placeholder="输入卡牌描述"></textarea>
@@ -596,9 +522,14 @@ function selectItem(type, id = null, stage = null) {
   selectedItem.value = { type, id, stage }
 }
 
-function selectFormStage(formId, stage) {
+function selectForm(formId) {
   activeTab.value = 'forms'
-  selectedItem.value = { type: 'forms', id: formId, stage }
+  selectedItem.value = { type: 'forms', id: formId }
+}
+
+function selectFormStage(formId, stage) {
+  // Legacy function kept for compatibility
+  selectForm(formId)
 }
 
 function toRoman(num) {
@@ -1163,6 +1094,23 @@ onMounted(() => {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Stage Section - for displaying multiple stages */
+.stage-section {
+  background: #f9f9f9;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.stage-section h3 {
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  font-size: 18px;
 }
 
 /* Items List */
