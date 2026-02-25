@@ -110,3 +110,27 @@ def upload_image(set_code, field_name):
         return jsonify({"url": relative_url}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@bp.route('/images/<set_code>', methods=['GET'])
+def list_images(set_code):
+    """List all images for a set"""
+    try:
+        image_dir = get_set_image_dir(set_code)
+        
+        if not image_dir.exists():
+            return jsonify({"images": []}), 200
+        
+        images = []
+        for file_path in image_dir.iterdir():
+            if file_path.is_file() and allowed_file(file_path.name):
+                images.append({
+                    "name": file_path.name,
+                    "url": f"/assets/image/{set_code}/{file_path.name}"
+                })
+        
+        # Sort by name
+        images.sort(key=lambda x: x['name'])
+        
+        return jsonify({"images": images}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
