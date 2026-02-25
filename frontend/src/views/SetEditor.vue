@@ -1070,7 +1070,11 @@ function addBuilding() {
   
   setData.value.buildings.push({
     id, name,
-    cost: 0, hp_init: 1, hp_limit: 1,
+    cost: 0, 
+    width: 1, 
+    height: 1, 
+    atk: 0,
+    hp_init: 1, hp_limit: 1,
     rarity: "R", image: "", icon: "", brast: "", text: "",
     bound_effects: [], bound_fixed_terms: []
   })
@@ -1097,6 +1101,9 @@ function addAttack() {
   setData.value.attacks.push({
     id, name,
     cost: 0,
+    atk_delta: 0,
+    card_type: "attack",
+    is_decision: false,
     rarity: "R", image: "", icon: "", brast: "", text: "",
     bound_effects: [], bound_fixed_terms: []
   })
@@ -1123,6 +1130,8 @@ function addStrategy() {
   setData.value.strategies.push({
     id, name,
     cost: 0,
+    card_type: "strategy",
+    is_decision: false,
     rarity: "R", image: "", icon: "", brast: "", text: "",
     bound_effects: [], bound_fixed_terms: []
   })

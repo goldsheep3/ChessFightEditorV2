@@ -38,8 +38,9 @@ class BoundFixedTermRef(BaseModel):
 class WithTextBindings(BaseModel):
     text: str = Field(default="", description="说明文本")
     # 采用 List 结构，天然支持一张卡片引用多个效果或固词
-    bound_effects: List[BoundEffectRef] = Field(default_factory=list, description="关联的效果引用")
-    bound_fixed_terms: List[BoundFixedTermRef] = Field(default_factory=list, description="关联的固词引用")
+    # 简化版本：直接使用字符串列表而非复杂对象结构
+    bound_effects: List[str] = Field(default_factory=list, description="关联的效果引用")
+    bound_fixed_terms: List[str] = Field(default_factory=list, description="关联的固词引用")
 
 class CardBaseAttributes(BaseModel):
     """所有卡片实体共用的美术与稀有度属性"""
