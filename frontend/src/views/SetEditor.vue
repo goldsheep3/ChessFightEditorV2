@@ -264,12 +264,19 @@
             <p v-if="Object.keys(setData.effects || {}).length === 0" class="empty-hint">暂无局部效果</p>
             <div v-for="(effect, id) in setData.effects" :key="id" class="card-item">
               <div class="card-header">
-                <h4>{{ effect.name }} <span class="id-badge">({{ id }})</span></h4>
-                <button class="delete-btn" @click="deleteEffect(id)">🗑️ 删除</button>
+                <h4>
+                  <span :class="['alignment-badge', `alignment-${effect.alignment}`]">
+                    {{ alignmentTranslation[effect.alignment] || effect.alignment }}
+                  </span>
+                  {{ effect.name }} <span class="id-badge">({{ id }})</span>
+                </h4>
+                <div class="card-actions">
+                  <button class="edit-btn" @click="editEffect(id, effect)">✏️ 编辑</button>
+                  <button class="delete-btn" @click="deleteEffect(id)">🗑️ 删除</button>
+                </div>
               </div>
               <div class="card-content">
-                <p><strong>性质:</strong> {{ alignmentTranslation[effect.alignment] || effect.alignment }}</p>
-                <p><strong>备注:</strong> {{ effect.note || '无' }}</p>
+                <p v-if="effect.note"><strong>备注:</strong> {{ effect.note }}</p>
               </div>
             </div>
           </div>
@@ -284,10 +291,13 @@
             <div v-for="(term, id) in setData.fixed_terms" :key="id" class="card-item">
               <div class="card-header">
                 <h4>{{ term.name }} <span class="id-badge">({{ id }})</span></h4>
-                <button class="delete-btn" @click="deleteFixedTerm(id)">🗑️ 删除</button>
+                <div class="card-actions">
+                  <button class="edit-btn" @click="editFixedTerm(id, term)">✏️ 编辑</button>
+                  <button class="delete-btn" @click="deleteFixedTerm(id)">🗑️ 删除</button>
+                </div>
               </div>
               <div class="card-content">
-                <p><strong>备注:</strong> {{ term.note || '无' }}</p>
+                <p v-if="term.note"><strong>备注:</strong> {{ term.note }}</p>
               </div>
             </div>
           </div>
@@ -642,6 +652,106 @@
         </div>
       </div>
     </div>
+
+    <!-- Effect Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showEffectModal" 
+      :title="isEditingEffect ? '✏️ 编辑局部效果' : '➕ 添加局部效果'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveEffect"
+    >
+      <div class="form-group">
+        <label>效果ID <span class="required">*</span></label>
+        <input 
+          v-model="editingEffect.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingEffect"
+          @keyup.enter="handleSaveEffect"
+        >
+        <small v-if="!isEditingEffect" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingEffect.name" 
+          type="text" 
+          placeholder="效果名称"
+          @keyup.enter="handleSaveEffect"
+        >
+      </div>
+      <div class="form-group">
+        <label>性质</label>
+        <select v-model="editingEffect.alignment">
+          <option value="positive">正面 (positive)</option>
+          <option value="neutral">中性 (neutral)</option>
+          <option value="negative">负面 (negative)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="editingEffect.note" 
+          rows="3" 
+          placeholder="效果备注（可选）"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingEffect" class="btn btn-danger" @click="handleDeleteEffect">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showEffectModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveEffect">确定</button>
+      </template>
+    </ModalDialog>
+
+    <!-- Fixed Term Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showTermModal" 
+      :title="isEditingTerm ? '✏️ 编辑局部固词' : '➕ 添加局部固词'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveTerm"
+    >
+      <div class="form-group">
+        <label>固词ID <span class="required">*</span></label>
+        <input 
+          v-model="editingTerm.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingTerm"
+          @keyup.enter="handleSaveTerm"
+        >
+        <small v-if="!isEditingTerm" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingTerm.name" 
+          type="text" 
+          placeholder="固词名称"
+          @keyup.enter="handleSaveTerm"
+        >
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea 
+          v-model="editingTerm.note" 
+          rows="3" 
+          placeholder="固词备注（可选）"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingTerm" class="btn btn-danger" @click="handleDeleteTerm">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showTermModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveTerm">确定</button>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -651,6 +761,7 @@ import { useRouter } from 'vue-router'
 import { setAPI, globalAPI } from '@/utils/api'
 import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
 import { useNotification } from '@/utils/notification'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 const props = defineProps({
   setCode: {
@@ -671,6 +782,18 @@ const hasUnsavedChanges = ref(false)
 const boundItemsValidation = ref({ effects: [], terms: [] }) // Store validation results for bound items
 const globalEffects = ref({}) // Global effects library
 const globalFixedTerms = ref({}) // Global fixed terms library
+
+// Modal state for local effects
+const showEffectModal = ref(false)
+const isEditingEffect = ref(false)
+const editingEffect = ref({ id: '', name: '', alignment: 'neutral', note: '' })
+const originalEffectId = ref('')
+
+// Modal state for local fixed terms
+const showTermModal = ref(false)
+const isEditingTerm = ref(false)
+const editingTerm = ref({ id: '', name: '', note: '' })
+const originalTermId = ref('')
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -903,73 +1026,148 @@ function toRoman(num) {
 
 // Effects management
 function addEffect() {
-  const effectId = prompt('请输入效果ID (小写字母、数字、下划线):')
-  if (!effectId) return
+  isEditingEffect.value = false
+  editingEffect.value = {
+    id: '',
+    name: '',
+    alignment: 'neutral',
+    note: ''
+  }
+  originalEffectId.value = ''
+  showEffectModal.value = true
+}
+
+function editEffect(id, effect) {
+  isEditingEffect.value = true
+  editingEffect.value = {
+    id: id,
+    name: effect.name,
+    alignment: effect.alignment,
+    note: effect.note || ''
+  }
+  originalEffectId.value = id
+  showEffectModal.value = true
+}
+
+function handleSaveEffect() {
+  const { id, name, alignment, note } = editingEffect.value
   
-  try {
-    validateId(effectId, '效果ID')
-  } catch (err) {
-    notification.error(err.message)
+  if (!id || !name) {
+    notification.error('请填写必填项：效果ID和名称')
     return
   }
   
-  if (!setData.value.effects) setData.value.effects = {}
-  if (setData.value.effects[effectId]) {
-    notification.error('该ID已存在！')
-    return
+  // Validate ID for new effects
+  if (!isEditingEffect.value) {
+    try {
+      validateId(id, '效果ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.effects) setData.value.effects = {}
+    if (setData.value.effects[id]) {
+      notification.error('该效果ID已存在！')
+      return
+    }
   }
   
-  const effectName = prompt('请输入效果名称:')
-  if (!effectName) return
-  
-  const alignment = prompt('请输入性质 (positive/neutral/negative):')
   if (!ALIGNMENT_OPTIONS.includes(alignment)) {
     notification.error('性质必须是 positive、neutral 或 negative')
     return
   }
   
-  setData.value.effects[effectId] = {
-    name: effectName,
-    alignment: alignment,
-    note: ""
+  setData.value.effects[id] = {
+    name,
+    alignment,
+    note: note || ''
   }
+  
+  notification.success(isEditingEffect.value ? '效果已更新！' : '效果已添加！')
+  showEffectModal.value = false
 }
 
 function deleteEffect(id) {
-  if (!confirm('确定要删除此效果吗？')) return
+  if (!confirm('确定要删除此效果吗？此操作无法撤销！')) return
   delete setData.value.effects[id]
+  notification.success('效果已删除！')
+}
+
+function handleDeleteEffect() {
+  const id = originalEffectId.value
+  delete setData.value.effects[id]
+  notification.success('效果已删除！')
+  showEffectModal.value = false
 }
 
 // Fixed terms management
 function addFixedTerm() {
-  const termId = prompt('请输入固词ID (小写字母、数字、下划线):')
-  if (!termId) return
+  isEditingTerm.value = false
+  editingTerm.value = {
+    id: '',
+    name: '',
+    note: ''
+  }
+  originalTermId.value = ''
+  showTermModal.value = true
+}
+
+function editFixedTerm(id, term) {
+  isEditingTerm.value = true
+  editingTerm.value = {
+    id: id,
+    name: term.name,
+    note: term.note || ''
+  }
+  originalTermId.value = id
+  showTermModal.value = true
+}
+
+function handleSaveTerm() {
+  const { id, name, note } = editingTerm.value
   
-  try {
-    validateId(termId, '固词ID')
-  } catch (err) {
-    notification.error(err.message)
+  if (!id || !name) {
+    notification.error('请填写必填项：固词ID和名称')
     return
   }
   
-  if (!setData.value.fixed_terms) setData.value.fixed_terms = {}
-  if (setData.value.fixed_terms[termId]) {
-    notification.error('该ID已存在！')
-    return
+  // Validate ID for new terms
+  if (!isEditingTerm.value) {
+    try {
+      validateId(id, '固词ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.fixed_terms) setData.value.fixed_terms = {}
+    if (setData.value.fixed_terms[id]) {
+      notification.error('该固词ID已存在！')
+      return
+    }
   }
   
-  const termName = prompt('请输入固词名称:')
-  if (!termName) return
-  
-  setData.value.fixed_terms[termId] = {
-    name: termName,
-    note: ""
+  setData.value.fixed_terms[id] = {
+    name,
+    note: note || ''
   }
+  
+  notification.success(isEditingTerm.value ? '固词已更新！' : '固词已添加！')
+  showTermModal.value = false
 }
 
 function deleteFixedTerm(id) {
-  if (!confirm('确定要删除此固词吗？')) return
+  if (!confirm('确定要删除此固词吗？此操作无法撤销！')) return
   delete setData.value.fixed_terms[id]
+  notification.success('固词已删除！')
+}
+
+function handleDeleteTerm() {
+  const id = originalTermId.value
+  delete setData.value.fixed_terms[id]
+  notification.success('固词已删除！')
+  showTermModal.value = false
 }
 
 // Forms management
@@ -1881,5 +2079,139 @@ onMounted(() => {
   .right-panel {
     display: none;
   }
+}
+
+/* Alignment badge styles */
+.alignment-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.alignment-positive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.alignment-neutral {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.alignment-negative {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Card actions container */
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  padding: 6px 12px;
+  border: none;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #5568d3;
+}
+
+/* Modal form styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.form-group input[type="text"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 5px;
+  color: #999;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #555;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
 }
 </style>

@@ -280,7 +280,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-<style scoped>
 .editor-layout {
   display: flex;
   flex-direction: column;
