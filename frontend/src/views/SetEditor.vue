@@ -33,15 +33,12 @@
             <div class="tree-children">
               <template v-for="(form, index) in setData.forms" :key="form.id">
                 <div 
-                  v-for="stage in form.stages" 
-                  :key="`${form.id}-${stage.stage}`"
                   class="tree-item child"
-                  :class="{ active: activeTab === 'forms' && selectedItem.id === form.id && selectedItem.stage === stage.stage }"
-                  @click="selectFormStage(form.id, stage.stage)"
+                  :class="{ active: activeTab === 'forms' && selectedItem.id === form.id }"
+                  @click="selectForm(form.id)"
                 >
                   <span class="tree-icon">◆</span>
                   <span class="tree-text">
-                    <span class="badge stage-badge">{{ toRoman(stage.stage) }}</span>
                     {{ form.name }}
                   </span>
                 </div>
@@ -213,25 +210,50 @@
           </div>
           <div class="form-group">
             <label>套组名称:</label>
-            <input type="text" v-model="setData.name" placeholder="输入套组名称">
+            <input 
+              type="text" 
+              v-model="setData.name" 
+              placeholder="输入套组名称"
+              :class="{ modified: isFieldModified('name', 'name') }"
+            >
           </div>
           <div class="form-group">
             <label>描述:</label>
-            <textarea v-model="setData.description" rows="3" placeholder="输入描述"></textarea>
+            <textarea 
+              v-model="setData.description" 
+              rows="3" 
+              placeholder="输入描述"
+              :class="{ modified: isFieldModified('description', 'description') }"
+            ></textarea>
           </div>
           <div class="form-group">
             <label>备注:</label>
-            <textarea v-model="setData.notes" rows="3" placeholder="输入备注"></textarea>
+            <textarea 
+              v-model="setData.notes" 
+              rows="3" 
+              placeholder="输入备注"
+              :class="{ modified: isFieldModified('notes', 'notes') }"
+            ></textarea>
           </div>
           
           <h3>设计信息</h3>
           <div class="form-group">
             <label>原型 (多个用逗号分隔):</label>
-            <input type="text" v-model="archetypesStr" placeholder="例如: 原型1, 原型2">
+            <input 
+              type="text" 
+              v-model="archetypesStr" 
+              placeholder="例如: 原型1, 原型2"
+              :class="{ modified: isFieldModified('archetypes', 'archetypes') }"
+            >
           </div>
           <div class="form-group">
             <label>设计师 (多个用逗号分隔):</label>
-            <input type="text" v-model="designersStr" placeholder="例如: 设计师1, 设计师2">
+            <input 
+              type="text" 
+              v-model="designersStr" 
+              placeholder="例如: 设计师1, 设计师2"
+              :class="{ modified: isFieldModified('designers', 'designers') }"
+            >
           </div>
         </div>
 
@@ -273,169 +295,159 @@
         </div>
 
         <!-- Forms Tab -->
-        <div v-if="activeTab === 'forms' && selectedItem.id && selectedItem.stage" class="edit-section">
+        <div v-if="activeTab === 'forms' && selectedItem.id" class="edit-section">
           <template v-for="form in setData.forms" :key="form.id">
             <template v-if="form.id === selectedItem.id">
+              <h2>{{ form.name }}</h2>
+              
+              <!-- Shared basic info (ID and Name shown only once) -->
+              <h3>基础信息 (所有阶段共享)</h3>
+              <div class="form-group">
+                <label>形态ID:</label>
+                <input type="text" :value="form.id" readonly>
+              </div>
+              <div class="form-group">
+                <label>形态名称:</label>
+                <input 
+                  type="text" 
+                  v-model="form.name" 
+                  placeholder="输入形态名称"
+                  :class="{ modified: isFormFieldModified(form.id, 'name') }"
+                >
+              </div>
+              
+              <!-- Display all stages (II and III) on the same page -->
               <template v-for="stage in form.stages" :key="`${form.id}-${stage.stage}`">
-                <div v-if="stage.stage === selectedItem.stage">
-                  <h2>{{ form.name }} - 【{{ toRoman(stage.stage) }}】阶</h2>
-                  
-                  <!-- Stage 1 and 2: Can edit name and all properties -->
-                  <template v-if="stage.stage !== 3">
-                    <h3>基础信息 (所有阶段共享)</h3>
-                    <div class="form-group">
-                      <label>形态ID:</label>
-                      <input type="text" :value="form.id" readonly>
-                    </div>
-                    <div class="form-group">
-                      <label>形态名称:</label>
-                      <input type="text" v-model="form.name" placeholder="输入形态名称">
-                    </div>
-                  </template>
-                  
-                  <!-- Stage 3: Cannot edit name (read-only) -->
-                  <template v-else>
-                    <h3>基础信息 (所有阶段共享，不可编辑)</h3>
-                    <div class="form-group">
-                      <label>形态ID:</label>
-                      <input type="text" :value="form.id" readonly>
-                    </div>
-                    <div class="form-group">
-                      <label>形态名称:</label>
-                      <input type="text" :value="form.name" readonly disabled>
-                      <p class="hint-text">提示：形态名称只能在【II】阶编辑</p>
-                    </div>
-                  </template>
-                  
-                  <!-- Common fields for all stages, but editable differently -->
+                <div class="stage-section">
                   <h3>【{{ toRoman(stage.stage) }}】阶属性</h3>
                   
-                  <!-- For stage 1 and 2: All fields editable -->
-                  <!-- For stage 3: Only text, effects, and fixed terms editable -->
-                  <template v-if="stage.stage !== 3">
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>消耗:</label>
-                        <input type="number" v-model.number="stage.cost" min="0">
-                      </div>
-                      <div class="form-group">
-                        <label>移动:</label>
-                        <input type="number" v-model.number="stage.move" min="0">
-                      </div>
-                      <div class="form-group">
-                        <label>攻击:</label>
-                        <input type="number" v-model.number="stage.atk" min="0">
-                      </div>
-                    </div>
-                    
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label>初始HP:</label>
-                        <input type="number" v-model.number="stage.hp_init" min="1">
-                      </div>
-                      <div class="form-group">
-                        <label>HP上限:</label>
-                        <input type="number" v-model.number="stage.hp_limit" min="1">
-                      </div>
-                      <div class="form-group">
-                        <label>稀有度:</label>
-                        <select v-model="stage.rarity">
-                          <option value="N">N</option>
-                          <option value="R">R</option>
-                          <option value="SR">SR</option>
-                          <option value="SSR">SSR</option>
-                        </select>
-                      </div>
-                    </div>
-                    
+                  <div class="form-row">
                     <div class="form-group">
-                      <label>图片URL:</label>
-                      <input type="text" v-model="stage.image" placeholder="图片地址">
+                      <label>消耗:</label>
+                      <input 
+                        type="number" 
+                        v-model.number="stage.cost" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'cost') }"
+                      >
                     </div>
                     <div class="form-group">
-                      <label>图标URL:</label>
-                      <input type="text" v-model="stage.icon" placeholder="图标地址">
+                      <label>移动:</label>
+                      <input 
+                        type="number" 
+                        v-model.number="stage.move" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'move') }"
+                      >
                     </div>
                     <div class="form-group">
-                      <label>爆裂值:</label>
-                      <input type="text" v-model="stage.brast" placeholder="爆裂值">
+                      <label>攻击:</label>
+                      <input 
+                        type="number" 
+                        v-model.number="stage.atk" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'atk') }"
+                      >
                     </div>
-                  </template>
+                  </div>
                   
-                  <!-- Stage 3: Show read-only stats -->
-                  <template v-else>
-                    <div class="readonly-section">
-                      <p class="hint-text">提示：以下数值属性只能在【II】阶编辑</p>
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label>消耗:</label>
-                          <input type="number" :value="stage.cost" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>移动:</label>
-                          <input type="number" :value="stage.move" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>攻击:</label>
-                          <input type="number" :value="stage.atk" readonly disabled>
-                        </div>
-                      </div>
-                      
-                      <div class="form-row">
-                        <div class="form-group">
-                          <label>初始HP:</label>
-                          <input type="number" :value="stage.hp_init" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>HP上限:</label>
-                          <input type="number" :value="stage.hp_limit" readonly disabled>
-                        </div>
-                        <div class="form-group">
-                          <label>稀有度:</label>
-                          <input type="text" :value="stage.rarity" readonly disabled>
-                        </div>
-                      </div>
-                      
-                      <div class="form-group">
-                        <label>图片URL:</label>
-                        <input type="text" :value="stage.image" readonly disabled>
-                      </div>
-                      <div class="form-group">
-                        <label>图标URL:</label>
-                        <input type="text" :value="stage.icon" readonly disabled>
-                      </div>
-                      <div class="form-group">
-                        <label>爆裂值:</label>
-                        <input type="text" :value="stage.brast" readonly disabled>
-                      </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>初始HP:</label>
+                      <input 
+                        type="number" 
+                        v-model.number="stage.hp_init" 
+                        min="1"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'hp_init') }"
+                      >
                     </div>
-                  </template>
+                    <div class="form-group">
+                      <label>HP上限:</label>
+                      <input 
+                        type="number" 
+                        v-model.number="stage.hp_limit" 
+                        min="1"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'hp_limit') }"
+                      >
+                    </div>
+                    <div class="form-group">
+                      <label>稀有度:</label>
+                      <select 
+                        v-model="stage.rarity"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'rarity') }"
+                      >
+                        <option value="N">N</option>
+                        <option value="R">R</option>
+                        <option value="SR">SR</option>
+                        <option value="SSR">SSR</option>
+                      </select>
+                    </div>
+                  </div>
                   
-                  <!-- Text, effects, and fixed terms: Always editable -->
-                  <h3>描述与效果 (可编辑)</h3>
+                  <div class="form-group">
+                    <label>图片URL:</label>
+                    <input 
+                      type="text" 
+                      v-model="stage.image" 
+                      placeholder="图片地址"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'image') }"
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>图标URL:</label>
+                    <input 
+                      type="text" 
+                      v-model="stage.icon" 
+                      placeholder="图标地址"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'icon') }"
+                    >
+                  </div>
+                  <div class="form-group">
+                    <label>爆裂值:</label>
+                    <input 
+                      type="text" 
+                      v-model="stage.brast" 
+                      placeholder="爆裂值"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'brast') }"
+                    >
+                  </div>
+                  
                   <div class="form-group">
                     <label>描述文本:</label>
-                    <textarea v-model="stage.text" rows="4" placeholder="输入卡牌描述"></textarea>
+                    <textarea 
+                      v-model="stage.text" 
+                      rows="4" 
+                      placeholder="输入卡牌描述"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'text') }"
+                    ></textarea>
                   </div>
                   
                   <div class="form-group">
                     <label>绑定效果 (多个用逗号分隔):</label>
-                    <input 
-                      type="text" 
-                      :value="(stage.bound_effects || []).join(', ')"
-                      @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                      placeholder="例如: effect1, effect2"
-                    >
+                    <div class="input-with-button">
+                      <input 
+                        type="text" 
+                        :value="(stage.bound_effects || []).join(', ')"
+                        @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        placeholder="例如: effect1, effect2"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
+                      >
+                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                    </div>
                   </div>
                   
                   <div class="form-group">
                     <label>绑定固词 (多个用逗号分隔):</label>
-                    <input 
-                      type="text" 
-                      :value="(stage.bound_fixed_terms || []).join(', ')"
-                      @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                      placeholder="例如: term1, term2"
-                    >
+                    <div class="input-with-button">
+                      <input 
+                        type="text" 
+                        :value="(stage.bound_fixed_terms || []).join(', ')"
+                        @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                        placeholder="例如: term1, term2"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
+                      >
+                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                    </div>
                   </div>
                 </div>
               </template>
@@ -519,9 +531,51 @@
         </div>
         
         <div class="effects-display-section">
-          <h3>绑定效果/固词</h3>
+          <h3>绑定效果/固词验证</h3>
           <div class="effects-list">
-            <p class="hint">当前页面处理的效果和固词描述将显示在这里</p>
+            <div v-if="boundItemsValidation.effects.length === 0 && boundItemsValidation.terms.length === 0" class="hint">
+              点击"🔄"按钮验证绑定的效果和固词
+            </div>
+            
+            <!-- Display bound effects -->
+            <div v-if="boundItemsValidation.effects.length > 0">
+              <h4>绑定效果:</h4>
+              <div v-for="item in boundItemsValidation.effects" :key="item.id" class="validation-item" :class="{ 'not-found': !item.exists }">
+                <div class="validation-header">
+                  <span class="validation-icon">{{ item.exists ? '✅' : '❌' }}</span>
+                  <strong>{{ item.id }}</strong>
+                  <span v-if="item.isGlobal" class="global-badge">全局</span>
+                  <span v-else-if="item.exists" class="local-badge">局部</span>
+                </div>
+                <div v-if="item.exists" class="validation-body">
+                  <p><strong>名称:</strong> {{ item.name }}</p>
+                  <p v-if="item.note"><strong>备注:</strong> {{ item.note }}</p>
+                </div>
+                <div v-else class="validation-error">
+                  ⚠️ 效果不存在！请检查ID是否正确。
+                </div>
+              </div>
+            </div>
+            
+            <!-- Display bound terms -->
+            <div v-if="boundItemsValidation.terms.length > 0" style="margin-top: 15px;">
+              <h4>绑定固词:</h4>
+              <div v-for="item in boundItemsValidation.terms" :key="item.id" class="validation-item" :class="{ 'not-found': !item.exists }">
+                <div class="validation-header">
+                  <span class="validation-icon">{{ item.exists ? '✅' : '❌' }}</span>
+                  <strong>{{ item.id }}</strong>
+                  <span v-if="item.isGlobal" class="global-badge">全局</span>
+                  <span v-else-if="item.exists" class="local-badge">局部</span>
+                </div>
+                <div v-if="item.exists" class="validation-body">
+                  <p><strong>名称:</strong> {{ item.name }}</p>
+                  <p v-if="item.note"><strong>备注:</strong> {{ item.note }}</p>
+                </div>
+                <div v-else class="validation-error">
+                  ⚠️ 固词不存在！请检查ID是否正确。
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -530,10 +584,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { setAPI } from '@/utils/api'
-import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION } from '@/utils/validation'
+import { setAPI, globalAPI } from '@/utils/api'
+import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
 
 const props = defineProps({
   setCode: {
@@ -546,8 +600,13 @@ const router = useRouter()
 const loading = ref(true)
 const error = ref(null)
 const setData = ref(null)
+const originalData = ref(null) // Store original data for change detection
 const activeTab = ref('basic')
 const selectedItem = ref({ type: 'basic', id: null, stage: null }) // Track selected item in tree
+const hasUnsavedChanges = ref(false)
+const boundItemsValidation = ref({ effects: [], terms: [] }) // Store validation results for bound items
+const globalEffects = ref({}) // Global effects library
+const globalFixedTerms = ref({}) // Global fixed terms library
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -578,6 +637,9 @@ async function loadSet() {
   try {
     const data = await setAPI.get(props.setCode)
     setData.value = data
+    // Deep copy original data for change detection
+    originalData.value = JSON.parse(JSON.stringify(data))
+    hasUnsavedChanges.value = false
     loading.value = false
   } catch (err) {
     console.error('Error loading set:', err)
@@ -586,19 +648,188 @@ async function loadSet() {
   }
 }
 
+async function loadGlobalLibraries() {
+  try {
+    const [effectsData, termsData] = await Promise.all([
+      globalAPI.getEffects(),
+      globalAPI.getFixedTerms()
+    ])
+    globalEffects.value = effectsData.effects || {}
+    globalFixedTerms.value = termsData.fixed_terms || {}
+  } catch (err) {
+    console.error('Error loading global libraries:', err)
+  }
+}
+
+// Validate bound effects and terms for current stage
+function validateBoundItems(boundEffects, boundTerms) {
+  const results = { effects: [], terms: [] }
+  
+  // Validate effects
+  if (boundEffects && boundEffects.length > 0) {
+    boundEffects.forEach(effectId => {
+      const exists = globalEffects.value[effectId] || setData.value?.effects?.[effectId]
+      results.effects.push({
+        id: effectId,
+        exists,
+        name: exists ? (globalEffects.value[effectId]?.name || setData.value?.effects?.[effectId]?.name) : null,
+        isGlobal: !!globalEffects.value[effectId],
+        note: exists ? (globalEffects.value[effectId]?.note || setData.value?.effects?.[effectId]?.note) : null
+      })
+    })
+  }
+  
+  // Validate terms
+  if (boundTerms && boundTerms.length > 0) {
+    boundTerms.forEach(termId => {
+      const exists = globalFixedTerms.value[termId] || setData.value?.fixed_terms?.[termId]
+      results.terms.push({
+        id: termId,
+        exists,
+        name: exists ? (globalFixedTerms.value[termId]?.name || setData.value?.fixed_terms?.[termId]?.name) : null,
+        isGlobal: !!globalFixedTerms.value[termId],
+        note: exists ? (globalFixedTerms.value[termId]?.note || setData.value?.fixed_terms?.[termId]?.note) : null
+      })
+    })
+  }
+  
+  boundItemsValidation.value = results
+  return results
+}
+
+// Get current stage data for validation
+function getCurrentStageBoundItems() {
+  if (activeTab.value !== 'forms' || !selectedItem.value.id) {
+    return { effects: [], terms: [] }
+  }
+  
+  const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
+  if (!form) return { effects: [], terms: [] }
+  
+  // Collect all bound items from all stages
+  const allEffects = []
+  const allTerms = []
+  
+  form.stages?.forEach(stage => {
+    if (stage.bound_effects) {
+      allEffects.push(...stage.bound_effects)
+    }
+    if (stage.bound_fixed_terms) {
+      allTerms.push(...stage.bound_fixed_terms)
+    }
+  })
+  
+  return {
+    effects: [...new Set(allEffects)], // Remove duplicates
+    terms: [...new Set(allTerms)]
+  }
+}
+
+// Refresh validation for current form
+function refreshBoundItemsValidation() {
+  const { effects, terms } = getCurrentStageBoundItems()
+  validateBoundItems(effects, terms)
+}
+
 function goBack() {
+  if (hasUnsavedChanges.value) {
+    const choice = confirm('当前页面有未保存的更改。是否保存？\n\n点击"确定"保存更改\n点击"取消"放弃更改')
+    if (choice) {
+      saveSet().then(() => {
+        router.push('/')
+      })
+      return
+    } else {
+      // User chose to discard changes
+      hasUnsavedChanges.value = false
+    }
+  }
   router.push('/')
+}
+
+// Helper function to check if a field is modified
+function isFieldModified(currentPath, originalPath) {
+  if (!originalData.value) return false
+  
+  // Get nested property using path string
+  const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((acc, part) => {
+      // Handle array indices
+      const arrayMatch = part.match(/^(.+)\[(\d+)\]$/)
+      if (arrayMatch) {
+        return acc?.[arrayMatch[1]]?.[parseInt(arrayMatch[2])]
+      }
+      return acc?.[part]
+    }, obj)
+  }
+  
+  const currentValue = getNestedValue(setData.value, currentPath)
+  const originalValue = getNestedValue(originalData.value, originalPath)
+  
+  return JSON.stringify(currentValue) !== JSON.stringify(originalValue)
+}
+
+// Helper to check if a form field is modified
+function isFormFieldModified(formId, field) {
+  if (!originalData.value || !setData.value) return false
+  
+  const formIndex = setData.value.forms?.findIndex(f => f.id === formId)
+  const originalFormIndex = originalData.value.forms?.findIndex(f => f.id === formId)
+  
+  if (formIndex === -1 || originalFormIndex === -1) return false
+  
+  const currentValue = setData.value.forms[formIndex][field]
+  const originalValue = originalData.value.forms[originalFormIndex][field]
+  
+  return JSON.stringify(currentValue) !== JSON.stringify(originalValue)
+}
+
+// Helper to check if a stage field is modified
+function isStageFieldModified(formId, stageNum, field) {
+  if (!originalData.value || !setData.value) return false
+  
+  const formIndex = setData.value.forms?.findIndex(f => f.id === formId)
+  const originalFormIndex = originalData.value.forms?.findIndex(f => f.id === formId)
+  
+  if (formIndex === -1 || originalFormIndex === -1) return false
+  
+  const stage = setData.value.forms[formIndex].stages?.find(s => s.stage === stageNum)
+  const originalStage = originalData.value.forms[originalFormIndex].stages?.find(s => s.stage === stageNum)
+  
+  if (!stage || !originalStage) return false
+  
+  return JSON.stringify(stage[field]) !== JSON.stringify(originalStage[field])
 }
 
 // Tree navigation helpers
 function selectItem(type, id = null, stage = null) {
+  // Check if there are unsaved changes
+  if (hasUnsavedChanges.value) {
+    const choice = confirm('当前页面有未保存的更改。是否保存？\n\n点击"确定"保存更改\n点击"取消"放弃更改')
+    if (choice) {
+      saveSet().then(() => {
+        activeTab.value = type
+        selectedItem.value = { type, id, stage }
+      })
+      return
+    } else {
+      // Discard changes - reload original data
+      setData.value = JSON.parse(JSON.stringify(originalData.value))
+      hasUnsavedChanges.value = false
+    }
+  }
+  
   activeTab.value = type
   selectedItem.value = { type, id, stage }
 }
 
+function selectForm(formId) {
+  selectItem('forms', formId)
+}
+
 function selectFormStage(formId, stage) {
-  activeTab.value = 'forms'
-  selectedItem.value = { type: 'forms', id: formId, stage }
+  // Legacy function kept for compatibility
+  selectForm(formId)
 }
 
 function toRoman(num) {
@@ -679,20 +910,17 @@ function deleteFixedTerm(id) {
 
 // Forms management
 function addForm() {
-  const formId = prompt('请输入形态ID (小写字母、数字、下划线):')
-  if (!formId) return
+  // Generate random 8-character ID automatically
+  let formId = generateRandomId(8)
   
-  try {
-    validateId(formId, '形态ID')
-  } catch (err) {
-    alert(err.message)
-    return
+  // Ensure the ID is unique
+  if (!setData.value.forms) setData.value.forms = []
+  while (setData.value.forms.some(f => f.id === formId)) {
+    formId = generateRandomId(8)
   }
   
-  const formName = prompt('请输入形态名称:')
-  if (!formName) return
-  
-  if (!setData.value.forms) setData.value.forms = []
+  // Use default name "新建卡牌"
+  const formName = "新建卡牌"
   
   setData.value.forms.push({
     id: formId,
@@ -739,18 +967,18 @@ function deleteForm(index) {
 
 // Simplified add functions for other entities
 function addSummon() {
-  const id = prompt('请输入召唤物ID:')
-  if (!id) return
-  try {
-    validateId(id, '召唤物ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入召唤物名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.summons) setData.value.summons = []
+  
+  // Ensure the ID is unique
+  while (setData.value.summons.some(s => s.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.summons.push({
     id, name,
     cost: 0, move: 0, atk: 0, hp_init: 1, hp_limit: 1,
@@ -765,18 +993,18 @@ function deleteSummon(index) {
 }
 
 function addBuilding() {
-  const id = prompt('请输入建筑ID:')
-  if (!id) return
-  try {
-    validateId(id, '建筑ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入建筑名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.buildings) setData.value.buildings = []
+  
+  // Ensure the ID is unique
+  while (setData.value.buildings.some(b => b.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.buildings.push({
     id, name,
     cost: 0, hp_init: 1, hp_limit: 1,
@@ -791,18 +1019,18 @@ function deleteBuilding(index) {
 }
 
 function addAttack() {
-  const id = prompt('请输入攻击ID:')
-  if (!id) return
-  try {
-    validateId(id, '攻击ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入攻击名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.attacks) setData.value.attacks = []
+  
+  // Ensure the ID is unique
+  while (setData.value.attacks.some(a => a.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.attacks.push({
     id, name,
     cost: 0,
@@ -817,18 +1045,18 @@ function deleteAttack(index) {
 }
 
 function addStrategy() {
-  const id = prompt('请输入策略ID:')
-  if (!id) return
-  try {
-    validateId(id, '策略ID')
-  } catch (err) {
-    alert(err.message)
-    return
-  }
-  const name = prompt('请输入策略名称:')
-  if (!name) return
-  
+  // Generate random 8-character ID automatically
+  let id = generateRandomId(8)
   if (!setData.value.strategies) setData.value.strategies = []
+  
+  // Ensure the ID is unique
+  while (setData.value.strategies.some(s => s.id === id)) {
+    id = generateRandomId(8)
+  }
+  
+  // Use default name "新建卡牌"
+  const name = "新建卡牌"
+  
   setData.value.strategies.push({
     id, name,
     cost: 0,
@@ -845,6 +1073,9 @@ function deleteStrategy(index) {
 async function saveSet() {
   try {
     await setAPI.save(props.setCode, setData.value)
+    // Update original data after successful save
+    originalData.value = JSON.parse(JSON.stringify(setData.value))
+    hasUnsavedChanges.value = false
     alert('保存成功！')
   } catch (err) {
     console.error('Error saving set:', err)
@@ -852,8 +1083,20 @@ async function saveSet() {
   }
 }
 
+// Watch for changes in setData
+watch(
+  () => setData.value,
+  (newVal) => {
+    if (!originalData.value || !newVal) return
+    // Compare current data with original to detect changes
+    hasUnsavedChanges.value = JSON.stringify(newVal) !== JSON.stringify(originalData.value)
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   loadSet()
+  loadGlobalLibraries()
 })
 </script>
 
@@ -1108,6 +1351,22 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+/* Highlight modified fields in yellow */
+.form-group input.modified,
+.form-group textarea.modified,
+.form-group select.modified {
+  background-color: #fffbea;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+}
+
+.form-group input.modified:focus,
+.form-group textarea.modified:focus,
+.form-group select.modified:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
 /* Form Row - for horizontal layout */
 .form-row {
   display: grid;
@@ -1166,6 +1425,23 @@ onMounted(() => {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Stage Section - for displaying multiple stages */
+.stage-section {
+  background: #f9f9f9;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.stage-section h3 {
+  color: #667eea;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+  font-size: 18px;
 }
 
 /* Items List */
@@ -1252,6 +1528,39 @@ onMounted(() => {
   background: #c0392b;
 }
 
+/* Input with Button */
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+.refresh-btn {
+  padding: 8px 16px;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refresh-btn:hover {
+  background: #667eea;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.refresh-btn:active {
+  transform: rotate(180deg) scale(0.95);
+}
+
 /* Right Panel */
 .right-panel {
   background: white;
@@ -1330,6 +1639,74 @@ onMounted(() => {
   text-align: center;
   font-style: italic;
   font-size: 14px;
+}
+
+.effects-list h4 {
+  color: #2c3e50;
+  font-size: 14px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.validation-item {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+}
+
+.validation-item.not-found {
+  border-color: #f59e0b;
+  background: #fffbea;
+}
+
+.validation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.validation-icon {
+  font-size: 16px;
+}
+
+.global-badge, .local-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.global-badge {
+  background: #667eea;
+  color: white;
+}
+
+.local-badge {
+  background: #10b981;
+  color: white;
+}
+
+.validation-body {
+  font-size: 13px;
+  color: #666;
+  padding-left: 24px;
+}
+
+.validation-body p {
+  margin: 4px 0;
+}
+
+.validation-error {
+  font-size: 13px;
+  color: #f59e0b;
+  padding-left: 24px;
+  font-weight: 500;
 }
 
 /* Responsive */
