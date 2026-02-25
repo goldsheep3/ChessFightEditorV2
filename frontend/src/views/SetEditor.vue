@@ -39,6 +39,7 @@
                 >
                   <span class="tree-icon">◆</span>
                   <span class="tree-text">
+                    <span :class="['rarity-badge', `rarity-${getFormRarity(form)}`]">{{ getFormRarity(form) }}</span>
                     {{ form.name }}
                   </span>
                 </div>
@@ -66,8 +67,9 @@
               >
                 <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span v-if="attack.rarity === 'SSR'" class="badge decision-badge">决策</span>
+                  <span :class="['rarity-badge', `rarity-${attack.rarity}`]">{{ attack.rarity }}</span>
                   {{ attack.name }}
+                  <span v-if="attack.is_decision" class="badge decision-badge">决策</span>
                 </span>
               </div>
               <div class="tree-item child add-item" @click="addAttack">
@@ -92,7 +94,11 @@
                 @click="selectItem('strategies', strategy.id)"
               >
                 <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ strategy.name }}</span>
+                <span class="tree-text">
+                  <span :class="['rarity-badge', `rarity-${strategy.rarity}`]">{{ strategy.rarity }}</span>
+                  {{ strategy.name }}
+                  <span v-if="strategy.is_decision" class="badge decision-badge">决策</span>
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addStrategy">
                 <span class="tree-icon">+</span>
@@ -116,7 +122,10 @@
                 @click="selectItem('summons', summon.id)"
               >
                 <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ summon.name }}</span>
+                <span class="tree-text">
+                  <span :class="['rarity-badge', `rarity-${summon.rarity}`]">{{ summon.rarity }}</span>
+                  {{ summon.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addSummon">
                 <span class="tree-icon">+</span>
@@ -140,7 +149,10 @@
                 @click="selectItem('buildings', building.id)"
               >
                 <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ building.name }}</span>
+                <span class="tree-text">
+                  <span :class="['rarity-badge', `rarity-${building.rarity}`]">{{ building.rarity }}</span>
+                  {{ building.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addBuilding">
                 <span class="tree-icon">+</span>
@@ -524,57 +536,258 @@
         </div>
 
         <!-- Attacks Tab -->
-        <div v-if="activeTab === 'attacks'" class="edit-section">
-          <h2>攻击</h2>
-          <div class="items-list">
-            <p v-if="!setData.attacks || setData.attacks.length === 0" class="empty-hint">暂无攻击</p>
-            <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item-display">
-              <div class="card-header">
-                <h4>{{ attack.name }} <span class="id-badge">({{ attack.id }})</span></h4>
-                <button class="edit-btn" @click="openEditAttackModal(index)">✏️ 编辑</button>
+        <div v-if="activeTab === 'attacks' && selectedItem.id" class="edit-section">
+          <template v-for="attack in setData.attacks" :key="attack.id">
+            <template v-if="attack.id === selectedItem.id">
+              <h2>{{ attack.name }}</h2>
+              
+              <h3>基础信息</h3>
+              <div class="form-group">
+                <label>攻击卡ID:</label>
+                <input type="text" :value="attack.id" readonly>
               </div>
-              <div class="card-info">
-                <div class="info-row">
-                  <span class="info-label">费用:</span>
-                  <span class="info-value">{{ attack.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ attack.rarity }}</span>
+              <div class="form-group">
+                <label>攻击卡名称:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.name" 
+                  placeholder="输入攻击卡名称"
+                >
+              </div>
+              <div class="form-group">
+                <label>稀有度:</label>
+                <select v-model="attack.rarity">
+                  <option value="R">R</option>
+                  <option value="SR">SR</option>
+                  <option value="SSR">SSR</option>
+                </select>
+              </div>
+              
+              <h3>属性</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>消耗:</label>
+                  <input 
+                    type="number" 
+                    v-model.number="attack.cost" 
+                    min="0"
+                  >
                 </div>
-                <div v-if="attack.text" class="info-row full">
-                  <span class="info-label">描述:</span>
-                  <span class="info-value">{{ attack.text }}</span>
+                <div class="form-group">
+                  <label>攻击增量:</label>
+                  <input 
+                    type="number" 
+                    v-model.number="attack.atk_delta"
+                  >
                 </div>
               </div>
-            </div>
-          </div>
-          <button class="add-btn" @click="addAttack">➕ 添加攻击</button>
+              
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" v-model="attack.is_decision">
+                  是否为决策卡
+                </label>
+              </div>
+              
+              <div v-if="attack.is_decision" class="form-group">
+                <label>决策免费条件:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.decision_free_condition" 
+                  placeholder="输入决策免费条件"
+                >
+              </div>
+              
+              <h3>卡面资源</h3>
+              <div class="form-group">
+                <label>图片URL:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.image" 
+                  placeholder="图片地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>图标URL:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.icon" 
+                  placeholder="图标地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>Q版图URL:</label>
+                <input 
+                  type="text" 
+                  v-model="attack.brast" 
+                  placeholder="Q版图地址"
+                >
+              </div>
+              
+              <h3>效果与固词</h3>
+              <div class="form-group">
+                <label>描述文本:</label>
+                <textarea 
+                  v-model="attack.text" 
+                  rows="4" 
+                  placeholder="输入卡牌描述"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定效果 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="(attack.bound_effects || []).join(', ')"
+                    @input="attack.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                    placeholder="例如: effect1, effect2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定固词 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="(attack.bound_fixed_terms || []).join(', ')"
+                    @input="attack.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                    placeholder="例如: term1, term2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="delete-btn" @click="deleteAttack(setData.attacks.indexOf(attack))">🗑️ 删除攻击卡</button>
+              </div>
+            </template>
+          </template>
         </div>
 
         <!-- Strategies Tab -->
-        <div v-if="activeTab === 'strategies'" class="edit-section">
-          <h2>策略</h2>
-          <div class="items-list">
-            <p v-if="!setData.strategies || setData.strategies.length === 0" class="empty-hint">暂无策略</p>
-            <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item-display">
-              <div class="card-header">
-                <h4>{{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span></h4>
-                <button class="edit-btn" @click="openEditStrategyModal(index)">✏️ 编辑</button>
+        <div v-if="activeTab === 'strategies' && selectedItem.id" class="edit-section">
+          <template v-for="strategy in setData.strategies" :key="strategy.id">
+            <template v-if="strategy.id === selectedItem.id">
+              <h2>{{ strategy.name }}</h2>
+              
+              <h3>基础信息</h3>
+              <div class="form-group">
+                <label>策略卡ID:</label>
+                <input type="text" :value="strategy.id" readonly>
               </div>
-              <div class="card-info">
-                <div class="info-row">
-                  <span class="info-label">费用:</span>
-                  <span class="info-value">{{ strategy.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ strategy.rarity }}</span>
-                </div>
-                <div v-if="strategy.text" class="info-row full">
-                  <span class="info-label">描述:</span>
-                  <span class="info-value">{{ strategy.text }}</span>
+              <div class="form-group">
+                <label>策略卡名称:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.name" 
+                  placeholder="输入策略卡名称"
+                >
+              </div>
+              <div class="form-group">
+                <label>稀有度:</label>
+                <select v-model="strategy.rarity">
+                  <option value="R">R</option>
+                  <option value="SR">SR</option>
+                  <option value="SSR">SSR</option>
+                </select>
+              </div>
+              
+              <h3>属性</h3>
+              <div class="form-group">
+                <label>消耗:</label>
+                <input 
+                  type="number" 
+                  v-model.number="strategy.cost" 
+                  min="0"
+                >
+              </div>
+              
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" v-model="strategy.is_decision">
+                  是否为决策卡
+                </label>
+              </div>
+              
+              <div v-if="strategy.is_decision" class="form-group">
+                <label>决策免费条件:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.decision_free_condition" 
+                  placeholder="输入决策免费条件"
+                >
+              </div>
+              
+              <h3>卡面资源</h3>
+              <div class="form-group">
+                <label>图片URL:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.image" 
+                  placeholder="图片地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>图标URL:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.icon" 
+                  placeholder="图标地址"
+                >
+              </div>
+              <div class="form-group">
+                <label>Q版图URL:</label>
+                <input 
+                  type="text" 
+                  v-model="strategy.brast" 
+                  placeholder="Q版图地址"
+                >
+              </div>
+              
+              <h3>效果与固词</h3>
+              <div class="form-group">
+                <label>描述文本:</label>
+                <textarea 
+                  v-model="strategy.text" 
+                  rows="4" 
+                  placeholder="输入卡牌描述"
+                ></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>绑定效果 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="(strategy.bound_effects || []).join(', ')"
+                    @input="strategy.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                    placeholder="例如: effect1, effect2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
                 </div>
               </div>
-            </div>
-          </div>
-          <button class="add-btn" @click="addStrategy">➕ 添加策略</button>
+              
+              <div class="form-group">
+                <label>绑定固词 (多个用逗号分隔):</label>
+                <div class="input-with-button">
+                  <input 
+                    type="text" 
+                    :value="(strategy.bound_fixed_terms || []).join(', ')"
+                    @input="strategy.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                    placeholder="例如: term1, term2"
+                  >
+                  <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button class="delete-btn" @click="deleteStrategy(setData.strategies.indexOf(strategy))">🗑️ 删除策略卡</button>
+              </div>
+            </template>
+          </template>
         </div>
       </div>
 
@@ -763,30 +976,79 @@ function validateBoundItems(boundEffects, boundTerms) {
 
 // Get current stage data for validation
 function getCurrentStageBoundItems() {
-  if (activeTab.value !== 'forms' || !selectedItem.value.id) {
+  if (!selectedItem.value.id) {
     return { effects: [], terms: [] }
   }
   
-  const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
-  if (!form) return { effects: [], terms: [] }
-  
-  // Collect all bound items from all stages
-  const allEffects = []
-  const allTerms = []
-  
-  form.stages?.forEach(stage => {
-    if (stage.bound_effects) {
-      allEffects.push(...stage.bound_effects)
+  // Handle forms
+  if (activeTab.value === 'forms') {
+    const form = setData.value?.forms?.find(f => f.id === selectedItem.value.id)
+    if (!form) return { effects: [], terms: [] }
+    
+    // Collect all bound items from all stages
+    const allEffects = []
+    const allTerms = []
+    
+    form.stages?.forEach(stage => {
+      if (stage.bound_effects) {
+        allEffects.push(...stage.bound_effects)
+      }
+      if (stage.bound_fixed_terms) {
+        allTerms.push(...stage.bound_fixed_terms)
+      }
+    })
+    
+    return {
+      effects: [...new Set(allEffects)], // Remove duplicates
+      terms: [...new Set(allTerms)]
     }
-    if (stage.bound_fixed_terms) {
-      allTerms.push(...stage.bound_fixed_terms)
-    }
-  })
-  
-  return {
-    effects: [...new Set(allEffects)], // Remove duplicates
-    terms: [...new Set(allTerms)]
   }
+  
+  // Handle attacks
+  if (activeTab.value === 'attacks') {
+    const attack = setData.value?.attacks?.find(a => a.id === selectedItem.value.id)
+    if (!attack) return { effects: [], terms: [] }
+    
+    return {
+      effects: attack.bound_effects || [],
+      terms: attack.bound_fixed_terms || []
+    }
+  }
+  
+  // Handle strategies
+  if (activeTab.value === 'strategies') {
+    const strategy = setData.value?.strategies?.find(s => s.id === selectedItem.value.id)
+    if (!strategy) return { effects: [], terms: [] }
+    
+    return {
+      effects: strategy.bound_effects || [],
+      terms: strategy.bound_fixed_terms || []
+    }
+  }
+  
+  // Handle summons
+  if (activeTab.value === 'summons') {
+    const summon = setData.value?.summons?.find(s => s.id === selectedItem.value.id)
+    if (!summon) return { effects: [], terms: [] }
+    
+    return {
+      effects: summon.bound_effects || [],
+      terms: summon.bound_fixed_terms || []
+    }
+  }
+  
+  // Handle buildings
+  if (activeTab.value === 'buildings') {
+    const building = setData.value?.buildings?.find(b => b.id === selectedItem.value.id)
+    if (!building) return { effects: [], terms: [] }
+    
+    return {
+      effects: building.bound_effects || [],
+      terms: building.bound_fixed_terms || []
+    }
+  }
+  
+  return { effects: [], terms: [] }
 }
 
 // Refresh validation for current form
@@ -899,6 +1161,16 @@ function selectFormStage(formId, stage) {
 function toRoman(num) {
   const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' }
   return lookup[num] || num
+}
+
+// Helper function to get the rarity of a form (from its highest stage)
+function getFormRarity(form) {
+  if (!form.stages || form.stages.length === 0) return 'R'
+  // Return the rarity of the highest stage (stage 3 if exists, else stage 2, else stage 1)
+  const stage3 = form.stages.find(s => s.stage === 3)
+  const stage2 = form.stages.find(s => s.stage === 2)
+  const stage1 = form.stages.find(s => s.stage === 1)
+  return (stage3?.rarity || stage2?.rarity || stage1?.rarity || 'R')
 }
 
 // Effects management
@@ -1021,6 +1293,9 @@ function addForm() {
       }
     ]
   })
+  
+  // Navigate to the newly created form
+  selectForm(formId)
 }
 
 function deleteForm(index) {
@@ -1107,6 +1382,9 @@ function addAttack() {
     rarity: "R", image: "", icon: "", brast: "", text: "",
     bound_effects: [], bound_fixed_terms: []
   })
+  
+  // Navigate to the newly created attack
+  selectItem('attacks', id)
 }
 
 function deleteAttack(index) {
@@ -1135,6 +1413,9 @@ function addStrategy() {
     rarity: "R", image: "", icon: "", brast: "", text: "",
     bound_effects: [], bound_fixed_terms: []
   })
+  
+  // Navigate to the newly created strategy
+  selectItem('strategies', id)
 }
 
 function deleteStrategy(index) {
@@ -1154,18 +1435,6 @@ function openEditBuildingModal(index) {
   activeTab.value = 'buildings'
   selectedItem.value = { type: 'buildings', id: setData.value.buildings[index].id }
   notification.info('建筑编辑功能开发中，请保存后在此界面编辑')
-}
-
-function openEditAttackModal(index) {
-  activeTab.value = 'attacks'
-  selectedItem.value = { type: 'attacks', id: setData.value.attacks[index].id }
-  notification.info('攻击编辑功能开发中，请保存后在此界面编辑')
-}
-
-function openEditStrategyModal(index) {
-  activeTab.value = 'strategies'
-  selectedItem.value = { type: 'strategies', id: setData.value.strategies[index].id }
-  notification.info('策略编辑功能开发中，请保存后在此界面编辑')
 }
 
 async function saveSet() {
@@ -1374,6 +1643,37 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(245, 87, 108, 0.3);
 }
 
+.rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-right: 6px;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.rarity-SSR {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b4513;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+}
+
+.rarity-SR {
+  background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(168, 85, 247, 0.4);
+}
+
+.rarity-R {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4);
+}
+
 
 .tree-section {
   margin-bottom: 5px;
@@ -1471,6 +1771,16 @@ onMounted(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-bottom: 20px;
+}
+
+/* Form actions */
+.form-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
 }
 
 /* Hint text */
