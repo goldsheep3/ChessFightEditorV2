@@ -88,40 +88,63 @@
       </div>
       <div class="form-group">
         <label>选择图片文件</label>
-        <input 
-          type="file" 
-          accept="image/*" 
-          multiple 
-          @change="handleFileSelect" 
-          ref="fileInput"
-        >
+        <div class="file-input-wrapper">
+          <input 
+            type="file" 
+            accept="image/*" 
+            multiple 
+            @change="handleFileSelect" 
+            ref="fileInput"
+            id="fileInput"
+            class="file-input-hidden"
+          >
+          <label for="fileInput" class="file-input-label">
+            <span class="file-input-icon">📁</span>
+            <span class="file-input-text">{{ selectedFiles.length > 0 ? `已选择 ${selectedFiles.length} 个文件` : '点击选择文件' }}</span>
+          </label>
+        </div>
       </div>
       <div v-if="selectedFiles.length > 0" class="selected-files">
-        <p><strong>已选择 {{ selectedFiles.length }} 个文件：</strong></p>
+        <div class="selected-files-header">
+          <span class="selected-files-icon">📝</span>
+          <strong>文件重命名</strong>
+        </div>
         <div class="file-rename-list">
-          <div v-for="(item, i) in fileList" :key="i" class="file-rename-item">
-            <span class="file-index">{{ i + 1 }}.</span>
-            <input 
-              v-model="item.newName" 
-              type="text" 
-              class="file-rename-input"
-              :placeholder="item.originalName"
-              @input="validateFileName(i)"
-            >
-            <span class="file-extension">.{{ item.extension }}</span>
-            <span v-if="item.error" class="file-error">{{ item.error }}</span>
+          <div v-for="(item, i) in fileList" :key="i" class="file-rename-item" :class="{ 'has-error': item.error }">
+            <span class="file-index">{{ i + 1 }}</span>
+            <div class="file-rename-input-group">
+              <input 
+                v-model="item.newName" 
+                type="text" 
+                class="file-rename-input"
+                :placeholder="item.originalName"
+                @input="validateFileName(i)"
+              >
+              <span class="file-extension">.{{ item.extension }}</span>
+            </div>
+            <span v-if="item.error" class="file-error">
+              <span class="error-icon">⚠️</span>
+              {{ item.error }}
+            </span>
           </div>
         </div>
-        <small class="form-hint">可以修改文件名，仅支持字母、数字、下划线和连字符</small>
+        <div class="form-hint-box">
+          <span class="hint-icon">💡</span>
+          <small class="form-hint">可以修改文件名，仅支持字母、数字、下划线和连字符</small>
+        </div>
       </div>
       <template #footer>
-        <button class="btn btn-secondary" @click="showUploadModal = false">取消</button>
+        <button class="btn btn-secondary btn-enhanced" @click="showUploadModal = false">
+          <span class="btn-icon">✕</span>
+          取消
+        </button>
         <button 
-          class="btn btn-primary" 
+          class="btn btn-primary btn-enhanced btn-upload" 
           @click="uploadImages" 
           :disabled="selectedFiles.length === 0"
         >
-          ⬆️ 上传 {{ selectedFiles.length > 0 ? `(${selectedFiles.length}个文件)` : '' }}
+          <span class="btn-icon">⬆️</span>
+          上传{{ selectedFiles.length > 0 ? ` (${selectedFiles.length}个文件)` : '' }}
         </button>
       </template>
     </ModalDialog>
@@ -533,14 +556,65 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="file"] {
+.form-group input[type="text"] {
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.form-group input[type="text"]:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Custom file input */
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input-hidden {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-input-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+}
+
+.file-input-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+.file-input-label:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.file-input-icon {
+  font-size: 20px;
+}
+
+.file-input-text {
+  font-size: 14px;
 }
 
 .form-hint {
@@ -551,11 +625,43 @@ onMounted(() => {
   font-style: italic;
 }
 
+.form-hint-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+}
+
+.hint-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
 .selected-files {
-  margin-top: 15px;
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 6px;
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 10px;
+  border: 1px solid #e0e6ed;
+}
+
+.selected-files-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+  font-size: 15px;
+  color: #333;
+}
+
+.selected-files-icon {
+  font-size: 18px;
 }
 
 .file-rename-list {
@@ -564,46 +670,89 @@ onMounted(() => {
 
 .file-rename-item {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.file-rename-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.file-rename-item.has-error {
+  border: 1px solid #e74c3c;
+  background: #fff5f5;
 }
 
 .file-index {
-  color: #999;
+  color: #667eea;
   font-size: 13px;
+  font-weight: 600;
   min-width: 25px;
+  padding-top: 10px;
+}
+
+.file-rename-input-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 4px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  padding: 2px;
+  transition: all 0.3s ease;
+}
+
+.file-rename-input-group:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.file-rename-item.has-error .file-rename-input-group {
+  border-color: #e74c3c;
 }
 
 .file-rename-input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: none;
   font-size: 14px;
   font-family: inherit;
-  transition: border-color 0.2s;
+  background: transparent;
 }
 
 .file-rename-input:focus {
   outline: none;
-  border-color: #667eea;
-}
-
-.file-rename-item.has-error .file-rename-input {
-  border-color: #e74c3c;
 }
 
 .file-extension {
-  color: #666;
+  color: #667eea;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  padding: 8px 12px;
+  background: #f0f3ff;
+  border-radius: 4px;
 }
 
 .file-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: #e74c3c;
   font-size: 12px;
-  margin-left: 5px;
+  padding-top: 10px;
+  flex-shrink: 0;
+}
+
+.error-icon {
+  font-size: 14px;
 }
 
 .selected-files ul {
@@ -615,6 +764,48 @@ onMounted(() => {
   margin-bottom: 5px;
   color: #666;
   font-size: 13px;
+}
+
+/* Enhanced button styles */
+.btn-enhanced {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-enhanced:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-upload {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-upload:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5568d3 0%, #66378e 100%);
+}
+
+.btn-upload:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Responsive */
