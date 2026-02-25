@@ -210,25 +210,50 @@
           </div>
           <div class="form-group">
             <label>套组名称:</label>
-            <input type="text" v-model="setData.name" placeholder="输入套组名称">
+            <input 
+              type="text" 
+              v-model="setData.name" 
+              placeholder="输入套组名称"
+              :class="{ modified: isFieldModified('name', 'name') }"
+            >
           </div>
           <div class="form-group">
             <label>描述:</label>
-            <textarea v-model="setData.description" rows="3" placeholder="输入描述"></textarea>
+            <textarea 
+              v-model="setData.description" 
+              rows="3" 
+              placeholder="输入描述"
+              :class="{ modified: isFieldModified('description', 'description') }"
+            ></textarea>
           </div>
           <div class="form-group">
             <label>备注:</label>
-            <textarea v-model="setData.notes" rows="3" placeholder="输入备注"></textarea>
+            <textarea 
+              v-model="setData.notes" 
+              rows="3" 
+              placeholder="输入备注"
+              :class="{ modified: isFieldModified('notes', 'notes') }"
+            ></textarea>
           </div>
           
           <h3>设计信息</h3>
           <div class="form-group">
             <label>原型 (多个用逗号分隔):</label>
-            <input type="text" v-model="archetypesStr" placeholder="例如: 原型1, 原型2">
+            <input 
+              type="text" 
+              v-model="archetypesStr" 
+              placeholder="例如: 原型1, 原型2"
+              :class="{ modified: isFieldModified('archetypes', 'archetypes') }"
+            >
           </div>
           <div class="form-group">
             <label>设计师 (多个用逗号分隔):</label>
-            <input type="text" v-model="designersStr" placeholder="例如: 设计师1, 设计师2">
+            <input 
+              type="text" 
+              v-model="designersStr" 
+              placeholder="例如: 设计师1, 设计师2"
+              :class="{ modified: isFieldModified('designers', 'designers') }"
+            >
           </div>
         </div>
 
@@ -283,7 +308,12 @@
               </div>
               <div class="form-group">
                 <label>形态名称:</label>
-                <input type="text" v-model="form.name" placeholder="输入形态名称">
+                <input 
+                  type="text" 
+                  v-model="form.name" 
+                  placeholder="输入形态名称"
+                  :class="{ modified: isFormFieldModified(form.id, 'name') }"
+                >
               </div>
               
               <!-- Display all stages (II and III) on the same page -->
@@ -294,30 +324,58 @@
                   <div class="form-row">
                     <div class="form-group">
                       <label>消耗:</label>
-                      <input type="number" v-model.number="stage.cost" min="0">
+                      <input 
+                        type="number" 
+                        v-model.number="stage.cost" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'cost') }"
+                      >
                     </div>
                     <div class="form-group">
                       <label>移动:</label>
-                      <input type="number" v-model.number="stage.move" min="0">
+                      <input 
+                        type="number" 
+                        v-model.number="stage.move" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'move') }"
+                      >
                     </div>
                     <div class="form-group">
                       <label>攻击:</label>
-                      <input type="number" v-model.number="stage.atk" min="0">
+                      <input 
+                        type="number" 
+                        v-model.number="stage.atk" 
+                        min="0"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'atk') }"
+                      >
                     </div>
                   </div>
                   
                   <div class="form-row">
                     <div class="form-group">
                       <label>初始HP:</label>
-                      <input type="number" v-model.number="stage.hp_init" min="1">
+                      <input 
+                        type="number" 
+                        v-model.number="stage.hp_init" 
+                        min="1"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'hp_init') }"
+                      >
                     </div>
                     <div class="form-group">
                       <label>HP上限:</label>
-                      <input type="number" v-model.number="stage.hp_limit" min="1">
+                      <input 
+                        type="number" 
+                        v-model.number="stage.hp_limit" 
+                        min="1"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'hp_limit') }"
+                      >
                     </div>
                     <div class="form-group">
                       <label>稀有度:</label>
-                      <select v-model="stage.rarity">
+                      <select 
+                        v-model="stage.rarity"
+                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'rarity') }"
+                      >
                         <option value="N">N</option>
                         <option value="R">R</option>
                         <option value="SR">SR</option>
@@ -328,20 +386,40 @@
                   
                   <div class="form-group">
                     <label>图片URL:</label>
-                    <input type="text" v-model="stage.image" placeholder="图片地址">
+                    <input 
+                      type="text" 
+                      v-model="stage.image" 
+                      placeholder="图片地址"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'image') }"
+                    >
                   </div>
                   <div class="form-group">
                     <label>图标URL:</label>
-                    <input type="text" v-model="stage.icon" placeholder="图标地址">
+                    <input 
+                      type="text" 
+                      v-model="stage.icon" 
+                      placeholder="图标地址"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'icon') }"
+                    >
                   </div>
                   <div class="form-group">
                     <label>爆裂值:</label>
-                    <input type="text" v-model="stage.brast" placeholder="爆裂值">
+                    <input 
+                      type="text" 
+                      v-model="stage.brast" 
+                      placeholder="爆裂值"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'brast') }"
+                    >
                   </div>
                   
                   <div class="form-group">
                     <label>描述文本:</label>
-                    <textarea v-model="stage.text" rows="4" placeholder="输入卡牌描述"></textarea>
+                    <textarea 
+                      v-model="stage.text" 
+                      rows="4" 
+                      placeholder="输入卡牌描述"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'text') }"
+                    ></textarea>
                   </div>
                   
                   <div class="form-group">
@@ -351,6 +429,7 @@
                       :value="(stage.bound_effects || []).join(', ')"
                       @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
                       placeholder="例如: effect1, effect2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
                     >
                   </div>
                   
@@ -361,6 +440,7 @@
                       :value="(stage.bound_fixed_terms || []).join(', ')"
                       @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
                       placeholder="例如: term1, term2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
                     >
                   </div>
                 </div>
@@ -531,6 +611,60 @@ function goBack() {
     }
   }
   router.push('/')
+}
+
+// Helper function to check if a field is modified
+function isFieldModified(currentPath, originalPath) {
+  if (!originalData.value) return false
+  
+  // Get nested property using path string
+  const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((acc, part) => {
+      // Handle array indices
+      const arrayMatch = part.match(/^(.+)\[(\d+)\]$/)
+      if (arrayMatch) {
+        return acc?.[arrayMatch[1]]?.[parseInt(arrayMatch[2])]
+      }
+      return acc?.[part]
+    }, obj)
+  }
+  
+  const currentValue = getNestedValue(setData.value, currentPath)
+  const originalValue = getNestedValue(originalData.value, originalPath)
+  
+  return JSON.stringify(currentValue) !== JSON.stringify(originalValue)
+}
+
+// Helper to check if a form field is modified
+function isFormFieldModified(formId, field) {
+  if (!originalData.value || !setData.value) return false
+  
+  const formIndex = setData.value.forms?.findIndex(f => f.id === formId)
+  const originalFormIndex = originalData.value.forms?.findIndex(f => f.id === formId)
+  
+  if (formIndex === -1 || originalFormIndex === -1) return false
+  
+  const currentValue = setData.value.forms[formIndex][field]
+  const originalValue = originalData.value.forms[originalFormIndex][field]
+  
+  return JSON.stringify(currentValue) !== JSON.stringify(originalValue)
+}
+
+// Helper to check if a stage field is modified
+function isStageFieldModified(formId, stageNum, field) {
+  if (!originalData.value || !setData.value) return false
+  
+  const formIndex = setData.value.forms?.findIndex(f => f.id === formId)
+  const originalFormIndex = originalData.value.forms?.findIndex(f => f.id === formId)
+  
+  if (formIndex === -1 || originalFormIndex === -1) return false
+  
+  const stage = setData.value.forms[formIndex].stages?.find(s => s.stage === stageNum)
+  const originalStage = originalData.value.forms[originalFormIndex].stages?.find(s => s.stage === stageNum)
+  
+  if (!stage || !originalStage) return false
+  
+  return JSON.stringify(stage[field]) !== JSON.stringify(originalStage[field])
 }
 
 // Tree navigation helpers
@@ -1080,6 +1214,22 @@ onMounted(() => {
 .form-group input[readonly] {
   background-color: #f0f0f0;
   cursor: not-allowed;
+}
+
+/* Highlight modified fields in yellow */
+.form-group input.modified,
+.form-group textarea.modified,
+.form-group select.modified {
+  background-color: #fffbea;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+}
+
+.form-group input.modified:focus,
+.form-group textarea.modified:focus,
+.form-group select.modified:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
 }
 
 /* Form Row - for horizontal layout */
