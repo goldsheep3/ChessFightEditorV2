@@ -37,7 +37,6 @@
                   :class="{ active: activeTab === 'forms' && selectedItem.id === form.id }"
                   @click="selectForm(form.id)"
                 >
-                  <span class="tree-icon">◆</span>
                   <span class="tree-text">
                     {{ form.name }}
                   </span>
@@ -64,9 +63,7 @@
                 :class="{ active: activeTab === 'attacks' && selectedItem.id === attack.id }"
                 @click="selectItem('attacks', attack.id)"
               >
-                <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span v-if="attack.rarity === 'SSR'" class="badge decision-badge">决策</span>
                   {{ attack.name }}
                 </span>
               </div>
@@ -91,8 +88,9 @@
                 :class="{ active: activeTab === 'strategies' && selectedItem.id === strategy.id }"
                 @click="selectItem('strategies', strategy.id)"
               >
-                <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ strategy.name }}</span>
+                <span class="tree-text">
+                  {{ strategy.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addStrategy">
                 <span class="tree-icon">+</span>
@@ -115,8 +113,9 @@
                 :class="{ active: activeTab === 'summons' && selectedItem.id === summon.id }"
                 @click="selectItem('summons', summon.id)"
               >
-                <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ summon.name }}</span>
+                <span class="tree-text">
+                  {{ summon.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addSummon">
                 <span class="tree-icon">+</span>
@@ -139,8 +138,9 @@
                 :class="{ active: activeTab === 'buildings' && selectedItem.id === building.id }"
                 @click="selectItem('buildings', building.id)"
               >
-                <span class="tree-icon">◆</span>
-                <span class="tree-text">{{ building.name }}</span>
+                <span class="tree-text">
+                  {{ building.name }}
+                </span>
               </div>
               <div class="tree-item child add-item" @click="addBuilding">
                 <span class="tree-icon">+</span>
@@ -434,30 +434,24 @@
                   
                   <div class="form-group">
                     <label>绑定效果 (多个用逗号分隔):</label>
-                    <div class="input-with-button">
-                      <input 
-                        type="text" 
-                        :value="(stage.bound_effects || []).join(', ')"
-                        @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                        placeholder="例如: effect1, effect2"
-                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
-                      >
-                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
-                    </div>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_effects || []).join(', ')"
+                      @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: effect1, effect2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
+                    >
                   </div>
                   
                   <div class="form-group">
                     <label>绑定固词 (多个用逗号分隔):</label>
-                    <div class="input-with-button">
-                      <input 
-                        type="text" 
-                        :value="(stage.bound_fixed_terms || []).join(', ')"
-                        @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                        placeholder="例如: term1, term2"
-                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
-                      >
-                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
-                    </div>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_fixed_terms || []).join(', ')"
+                      @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: term1, term2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
+                    >
                   </div>
                 </div>
               </template>
@@ -472,7 +466,10 @@
             <p v-if="!setData.summons || setData.summons.length === 0" class="empty-hint">暂无召唤物</p>
             <div v-for="(summon, index) in setData.summons" :key="index" class="card-item-display">
               <div class="card-header">
-                <h4>{{ summon.name }} <span class="id-badge">({{ summon.id }})</span></h4>
+                <h4>
+                  <span :class="['badge', getRarityBadgeClass(summon.rarity)]">{{ summon.rarity }}</span>
+                  {{ summon.name }} <span class="id-badge">({{ summon.id }})</span>
+                </h4>
                 <button class="edit-btn" @click="openEditSummonModal(index)">✏️ 编辑</button>
               </div>
               <div class="card-info">
@@ -489,8 +486,6 @@
                   <span class="info-value">{{ summon.hp_init }}</span>
                   <span class="info-label">最大HP:</span>
                   <span class="info-value">{{ summon.hp_limit }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ summon.rarity }}</span>
                 </div>
                 <div v-if="summon.text" class="info-row full">
                   <span class="info-label">描述:</span>
@@ -509,7 +504,10 @@
             <p v-if="!setData.buildings || setData.buildings.length === 0" class="empty-hint">暂无建筑</p>
             <div v-for="(building, index) in setData.buildings" :key="index" class="card-item-display">
               <div class="card-header">
-                <h4>{{ building.name }} <span class="id-badge">({{ building.id }})</span></h4>
+                <h4>
+                  <span :class="['badge', getRarityBadgeClass(building.rarity)]">{{ building.rarity }}</span>
+                  {{ building.name }} <span class="id-badge">({{ building.id }})</span>
+                </h4>
                 <button class="edit-btn" @click="openEditBuildingModal(index)">✏️ 编辑</button>
               </div>
               <div class="card-info">
@@ -520,8 +518,6 @@
                   <span class="info-value">{{ building.hp_init }}</span>
                   <span class="info-label">最大HP:</span>
                   <span class="info-value">{{ building.hp_limit }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ building.rarity }}</span>
                 </div>
                 <div v-if="building.text" class="info-row full">
                   <span class="info-label">描述:</span>
@@ -540,15 +536,16 @@
             <p v-if="!setData.attacks || setData.attacks.length === 0" class="empty-hint">暂无攻击</p>
             <div v-for="(attack, index) in setData.attacks" :key="index" class="card-item-display">
               <div class="card-header">
-                <h4>{{ attack.name }} <span class="id-badge">({{ attack.id }})</span></h4>
+                <h4>
+                  <span :class="['badge', getRarityBadgeClass(attack.rarity)]">{{ attack.rarity }}</span>
+                  {{ attack.name }} <span class="id-badge">({{ attack.id }})</span>
+                </h4>
                 <button class="edit-btn" @click="openEditAttackModal(index)">✏️ 编辑</button>
               </div>
               <div class="card-info">
                 <div class="info-row">
                   <span class="info-label">费用:</span>
                   <span class="info-value">{{ attack.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ attack.rarity }}</span>
                 </div>
                 <div v-if="attack.text" class="info-row full">
                   <span class="info-label">描述:</span>
@@ -567,15 +564,16 @@
             <p v-if="!setData.strategies || setData.strategies.length === 0" class="empty-hint">暂无策略</p>
             <div v-for="(strategy, index) in setData.strategies" :key="index" class="card-item-display">
               <div class="card-header">
-                <h4>{{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span></h4>
+                <h4>
+                  <span :class="['badge', getRarityBadgeClass(strategy.rarity)]">{{ strategy.rarity }}</span>
+                  {{ strategy.name }} <span class="id-badge">({{ strategy.id }})</span>
+                </h4>
                 <button class="edit-btn" @click="openEditStrategyModal(index)">✏️ 编辑</button>
               </div>
               <div class="card-info">
                 <div class="info-row">
                   <span class="info-label">费用:</span>
                   <span class="info-value">{{ strategy.cost }}</span>
-                  <span class="info-label">稀有度:</span>
-                  <span class="info-value">{{ strategy.rarity }}</span>
                 </div>
                 <div v-if="strategy.text" class="info-row full">
                   <span class="info-label">描述:</span>
@@ -603,10 +601,13 @@
         </div>
         
         <div class="effects-display-section">
-          <h3>绑定效果/固词验证</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>绑定效果/固词验证</h3>
+            <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄 刷新</button>
+          </div>
           <div class="effects-list">
             <div v-if="boundItemsValidation.effects.length === 0 && boundItemsValidation.terms.length === 0" class="hint">
-              点击"🔄"按钮验证绑定的效果和固词
+              点击"🔄 刷新"按钮验证绑定的效果和固词
             </div>
             
             <!-- Display bound effects -->
@@ -752,6 +753,330 @@
         <button class="btn btn-primary" @click="handleSaveTerm">确定</button>
       </template>
     </ModalDialog>
+
+    <!-- Attack Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showAttackModal" 
+      :title="isEditingAttack ? '✏️ 编辑攻击卡' : '➕ 添加攻击卡'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveAttack"
+    >
+      <div class="form-group">
+        <label>卡牌ID <span class="required">*</span></label>
+        <input 
+          v-model="editingAttack.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingAttack"
+          @keyup.enter="handleSaveAttack"
+        >
+        <small v-if="!isEditingAttack" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingAttack.name" 
+          type="text" 
+          placeholder="卡牌名称"
+          @keyup.enter="handleSaveAttack"
+        >
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingAttack.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingAttack.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea 
+          v-model="editingAttack.text" 
+          rows="3" 
+          placeholder="卡牌描述"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingAttack" class="btn btn-danger" @click="handleDeleteAttack">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showAttackModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveAttack">确定</button>
+      </template>
+    </ModalDialog>
+
+    <!-- Strategy Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showStrategyModal" 
+      :title="isEditingStrategy ? '✏️ 编辑策略卡' : '➕ 添加策略卡'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveStrategy"
+    >
+      <div class="form-group">
+        <label>卡牌ID <span class="required">*</span></label>
+        <input 
+          v-model="editingStrategy.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingStrategy"
+          @keyup.enter="handleSaveStrategy"
+        >
+        <small v-if="!isEditingStrategy" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingStrategy.name" 
+          type="text" 
+          placeholder="卡牌名称"
+          @keyup.enter="handleSaveStrategy"
+        >
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingStrategy.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingStrategy.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea 
+          v-model="editingStrategy.text" 
+          rows="3" 
+          placeholder="卡牌描述"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingStrategy" class="btn btn-danger" @click="handleDeleteStrategy">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showStrategyModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveStrategy">确定</button>
+      </template>
+    </ModalDialog>
+
+    <!-- Summon Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showSummonModal" 
+      :title="isEditingSummon ? '✏️ 编辑召唤物卡' : '➕ 添加召唤物卡'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveSummon"
+    >
+      <div class="form-group">
+        <label>卡牌ID <span class="required">*</span></label>
+        <input 
+          v-model="editingSummon.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingSummon"
+          @keyup.enter="handleSaveSummon"
+        >
+        <small v-if="!isEditingSummon" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingSummon.name" 
+          type="text" 
+          placeholder="卡牌名称"
+          @keyup.enter="handleSaveSummon"
+        >
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingSummon.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>移动</label>
+          <input 
+            v-model.number="editingSummon.move" 
+            type="number" 
+            min="0"
+            placeholder="移动"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>攻击</label>
+          <input 
+            v-model.number="editingSummon.atk" 
+            type="number" 
+            min="0"
+            placeholder="攻击"
+          >
+        </div>
+        <div class="form-group">
+          <label>初始HP</label>
+          <input 
+            v-model.number="editingSummon.hp_init" 
+            type="number" 
+            min="1"
+            placeholder="初始HP"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>最大HP</label>
+          <input 
+            v-model.number="editingSummon.hp_limit" 
+            type="number" 
+            min="1"
+            placeholder="最大HP"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingSummon.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea 
+          v-model="editingSummon.text" 
+          rows="3" 
+          placeholder="卡牌描述"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingSummon" class="btn btn-danger" @click="handleDeleteSummon">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showSummonModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveSummon">确定</button>
+      </template>
+    </ModalDialog>
+
+    <!-- Building Edit/Add Modal -->
+    <ModalDialog 
+      v-model="showBuildingModal" 
+      :title="isEditingBuilding ? '✏️ 编辑建筑物卡' : '➕ 添加建筑物卡'"
+      size="medium"
+      :show-footer="true"
+      :show-confirm="true"
+      :show-cancel="true"
+      @confirm="handleSaveBuilding"
+    >
+      <div class="form-group">
+        <label>卡牌ID <span class="required">*</span></label>
+        <input 
+          v-model="editingBuilding.id" 
+          type="text" 
+          placeholder="小写字母、数字、下划线"
+          :disabled="isEditingBuilding"
+          @keyup.enter="handleSaveBuilding"
+        >
+        <small v-if="!isEditingBuilding" class="form-hint">ID创建后不可修改</small>
+      </div>
+      <div class="form-group">
+        <label>名称 <span class="required">*</span></label>
+        <input 
+          v-model="editingBuilding.name" 
+          type="text" 
+          placeholder="卡牌名称"
+          @keyup.enter="handleSaveBuilding"
+        >
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingBuilding.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>初始HP</label>
+          <input 
+            v-model.number="editingBuilding.hp_init" 
+            type="number" 
+            min="1"
+            placeholder="初始HP"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>最大HP</label>
+          <input 
+            v-model.number="editingBuilding.hp_limit" 
+            type="number" 
+            min="1"
+            placeholder="最大HP"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingBuilding.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>描述</label>
+        <textarea 
+          v-model="editingBuilding.text" 
+          rows="3" 
+          placeholder="卡牌描述"
+        ></textarea>
+      </div>
+      <template #footer>
+        <button v-if="isEditingBuilding" class="btn btn-danger" @click="handleDeleteBuilding">🗑️ 删除</button>
+        <div style="flex: 1"></div>
+        <button class="btn btn-secondary" @click="showBuildingModal = false">取消</button>
+        <button class="btn btn-primary" @click="handleSaveBuilding">确定</button>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -794,6 +1119,30 @@ const showTermModal = ref(false)
 const isEditingTerm = ref(false)
 const editingTerm = ref({ id: '', name: '', note: '' })
 const originalTermId = ref('')
+
+// Modal state for attack cards
+const showAttackModal = ref(false)
+const isEditingAttack = ref(false)
+const editingAttack = ref({ id: '', name: '', cost: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingAttackIndex = ref(-1)
+
+// Modal state for strategy cards
+const showStrategyModal = ref(false)
+const isEditingStrategy = ref(false)
+const editingStrategy = ref({ id: '', name: '', cost: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingStrategyIndex = ref(-1)
+
+// Modal state for summon cards
+const showSummonModal = ref(false)
+const isEditingSummon = ref(false)
+const editingSummon = ref({ id: '', name: '', cost: 0, move: 0, atk: 0, hp_init: 1, hp_limit: 1, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingSummonIndex = ref(-1)
+
+// Modal state for building cards
+const showBuildingModal = ref(false)
+const isEditingBuilding = ref(false)
+const editingBuilding = ref({ id: '', name: '', cost: 0, hp_init: 1, hp_limit: 1, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingBuildingIndex = ref(-1)
 
 const alignmentTranslation = ALIGNMENT_TRANSLATION
 
@@ -997,6 +1346,7 @@ function selectItem(type, id = null, stage = null) {
       saveSet().then(() => {
         activeTab.value = type
         selectedItem.value = { type, id, stage }
+        refreshBoundItemsValidation()
       })
       return
     } else {
@@ -1008,6 +1358,7 @@ function selectItem(type, id = null, stage = null) {
   
   activeTab.value = type
   selectedItem.value = { type, id, stage }
+  refreshBoundItemsValidation()
 }
 
 function selectForm(formId) {
@@ -1022,6 +1373,17 @@ function selectFormStage(formId, stage) {
 function toRoman(num) {
   const lookup = { 1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V' }
   return lookup[num] || num
+}
+
+// Helper function to get rarity badge class
+function getRarityBadgeClass(rarity) {
+  const rarityMap = {
+    'SSR': 'rarity-ssr',
+    'SR': 'rarity-sr',
+    'R': 'rarity-r',
+    'N': 'rarity-n'
+  }
+  return rarityMap[rarity] || 'rarity-r'
 }
 
 // Effects management
@@ -1228,24 +1590,25 @@ function deleteForm(index) {
 
 // Simplified add functions for other entities
 function addSummon() {
-  // Generate random 8-character ID automatically
-  let id = generateRandomId(8)
-  if (!setData.value.summons) setData.value.summons = []
-  
-  // Ensure the ID is unique
-  while (setData.value.summons.some(s => s.id === id)) {
-    id = generateRandomId(8)
+  isEditingSummon.value = false
+  editingSummonIndex.value = -1
+  editingSummon.value = {
+    id: '',
+    name: '',
+    cost: 0,
+    move: 0,
+    atk: 0,
+    hp_init: 1,
+    hp_limit: 1,
+    rarity: 'R',
+    image: '',
+    icon: '',
+    brast: '',
+    text: '',
+    bound_effects: [],
+    bound_fixed_terms: []
   }
-  
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
-  
-  setData.value.summons.push({
-    id, name,
-    cost: 0, move: 0, atk: 0, hp_init: 1, hp_limit: 1,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+  showSummonModal.value = true
 }
 
 function deleteSummon(index) {
@@ -1254,24 +1617,23 @@ function deleteSummon(index) {
 }
 
 function addBuilding() {
-  // Generate random 8-character ID automatically
-  let id = generateRandomId(8)
-  if (!setData.value.buildings) setData.value.buildings = []
-  
-  // Ensure the ID is unique
-  while (setData.value.buildings.some(b => b.id === id)) {
-    id = generateRandomId(8)
+  isEditingBuilding.value = false
+  editingBuildingIndex.value = -1
+  editingBuilding.value = {
+    id: '',
+    name: '',
+    cost: 0,
+    hp_init: 1,
+    hp_limit: 1,
+    rarity: 'R',
+    image: '',
+    icon: '',
+    brast: '',
+    text: '',
+    bound_effects: [],
+    bound_fixed_terms: []
   }
-  
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
-  
-  setData.value.buildings.push({
-    id, name,
-    cost: 0, hp_init: 1, hp_limit: 1,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+  showBuildingModal.value = true
 }
 
 function deleteBuilding(index) {
@@ -1280,24 +1642,21 @@ function deleteBuilding(index) {
 }
 
 function addAttack() {
-  // Generate random 8-character ID automatically
-  let id = generateRandomId(8)
-  if (!setData.value.attacks) setData.value.attacks = []
-  
-  // Ensure the ID is unique
-  while (setData.value.attacks.some(a => a.id === id)) {
-    id = generateRandomId(8)
-  }
-  
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
-  
-  setData.value.attacks.push({
-    id, name,
+  isEditingAttack.value = false
+  editingAttackIndex.value = -1
+  editingAttack.value = {
+    id: '',
+    name: '',
     cost: 0,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+    rarity: 'R',
+    image: '',
+    icon: '',
+    brast: '',
+    text: '',
+    bound_effects: [],
+    bound_fixed_terms: []
+  }
+  showAttackModal.value = true
 }
 
 function deleteAttack(index) {
@@ -1306,24 +1665,21 @@ function deleteAttack(index) {
 }
 
 function addStrategy() {
-  // Generate random 8-character ID automatically
-  let id = generateRandomId(8)
-  if (!setData.value.strategies) setData.value.strategies = []
-  
-  // Ensure the ID is unique
-  while (setData.value.strategies.some(s => s.id === id)) {
-    id = generateRandomId(8)
-  }
-  
-  // Use default name "新建卡牌"
-  const name = "新建卡牌"
-  
-  setData.value.strategies.push({
-    id, name,
+  isEditingStrategy.value = false
+  editingStrategyIndex.value = -1
+  editingStrategy.value = {
+    id: '',
+    name: '',
     cost: 0,
-    rarity: "R", image: "", icon: "", brast: "", text: "",
-    bound_effects: [], bound_fixed_terms: []
-  })
+    rarity: 'R',
+    image: '',
+    icon: '',
+    brast: '',
+    text: '',
+    bound_effects: [],
+    bound_fixed_terms: []
+  }
+  showStrategyModal.value = true
 }
 
 function deleteStrategy(index) {
@@ -1334,27 +1690,245 @@ function deleteStrategy(index) {
 // Placeholder edit functions for items - these open the item for editing
 // For now, they just navigate to the item, but can be enhanced with modals later
 function openEditSummonModal(index) {
-  activeTab.value = 'summons'
-  selectedItem.value = { type: 'summons', id: setData.value.summons[index].id }
-  notification.info('召唤物编辑功能开发中，请保存后在此界面编辑')
+  const summon = setData.value.summons[index]
+  isEditingSummon.value = true
+  editingSummonIndex.value = index
+  editingSummon.value = { ...summon, bound_effects: [...(summon.bound_effects || [])], bound_fixed_terms: [...(summon.bound_fixed_terms || [])] }
+  showSummonModal.value = true
 }
 
 function openEditBuildingModal(index) {
-  activeTab.value = 'buildings'
-  selectedItem.value = { type: 'buildings', id: setData.value.buildings[index].id }
-  notification.info('建筑编辑功能开发中，请保存后在此界面编辑')
+  const building = setData.value.buildings[index]
+  isEditingBuilding.value = true
+  editingBuildingIndex.value = index
+  editingBuilding.value = { ...building, bound_effects: [...(building.bound_effects || [])], bound_fixed_terms: [...(building.bound_fixed_terms || [])] }
+  showBuildingModal.value = true
 }
 
 function openEditAttackModal(index) {
-  activeTab.value = 'attacks'
-  selectedItem.value = { type: 'attacks', id: setData.value.attacks[index].id }
-  notification.info('攻击编辑功能开发中，请保存后在此界面编辑')
+  const attack = setData.value.attacks[index]
+  isEditingAttack.value = true
+  editingAttackIndex.value = index
+  editingAttack.value = { ...attack, bound_effects: [...(attack.bound_effects || [])], bound_fixed_terms: [...(attack.bound_fixed_terms || [])] }
+  showAttackModal.value = true
 }
 
 function openEditStrategyModal(index) {
-  activeTab.value = 'strategies'
-  selectedItem.value = { type: 'strategies', id: setData.value.strategies[index].id }
-  notification.info('策略编辑功能开发中，请保存后在此界面编辑')
+  const strategy = setData.value.strategies[index]
+  isEditingStrategy.value = true
+  editingStrategyIndex.value = index
+  editingStrategy.value = { ...strategy, bound_effects: [...(strategy.bound_effects || [])], bound_fixed_terms: [...(strategy.bound_fixed_terms || [])] }
+  showStrategyModal.value = true
+}
+
+// Handler functions for saving attacks
+function handleSaveAttack() {
+  const { id, name, cost, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingAttack.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：卡牌ID和名称')
+    return
+  }
+  
+  // Validate ID for new attacks
+  if (!isEditingAttack.value) {
+    try {
+      validateId(id, '攻击ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.attacks) setData.value.attacks = []
+    if (setData.value.attacks.some(a => a.id === id)) {
+      notification.error('该攻击ID已存在！')
+      return
+    }
+    
+    // Add new attack
+    setData.value.attacks.push({
+      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    })
+  } else {
+    // Update existing attack
+    const index = editingAttackIndex.value
+    setData.value.attacks[index] = {
+      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    }
+  }
+  
+  notification.success(isEditingAttack.value ? '攻击已更新！' : '攻击已添加！')
+  showAttackModal.value = false
+}
+
+function handleDeleteAttack() {
+  const index = editingAttackIndex.value
+  setData.value.attacks.splice(index, 1)
+  notification.success('攻击已删除！')
+  showAttackModal.value = false
+}
+
+// Handler functions for saving strategies
+function handleSaveStrategy() {
+  const { id, name, cost, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingStrategy.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：卡牌ID和名称')
+    return
+  }
+  
+  // Validate ID for new strategies
+  if (!isEditingStrategy.value) {
+    try {
+      validateId(id, '策略ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.strategies) setData.value.strategies = []
+    if (setData.value.strategies.some(s => s.id === id)) {
+      notification.error('该策略ID已存在！')
+      return
+    }
+    
+    // Add new strategy
+    setData.value.strategies.push({
+      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    })
+  } else {
+    // Update existing strategy
+    const index = editingStrategyIndex.value
+    setData.value.strategies[index] = {
+      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    }
+  }
+  
+  notification.success(isEditingStrategy.value ? '策略已更新！' : '策略已添加！')
+  showStrategyModal.value = false
+}
+
+function handleDeleteStrategy() {
+  const index = editingStrategyIndex.value
+  setData.value.strategies.splice(index, 1)
+  notification.success('策略已删除！')
+  showStrategyModal.value = false
+}
+
+// Handler functions for saving summons
+function handleSaveSummon() {
+  const { id, name, cost, move, atk, hp_init, hp_limit, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingSummon.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：卡牌ID和名称')
+    return
+  }
+  
+  // Validate ID for new summons
+  if (!isEditingSummon.value) {
+    try {
+      validateId(id, '召唤物ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.summons) setData.value.summons = []
+    if (setData.value.summons.some(s => s.id === id)) {
+      notification.error('该召唤物ID已存在！')
+      return
+    }
+    
+    // Add new summon
+    setData.value.summons.push({
+      id, name, cost: Number(cost), move: Number(move), atk: Number(atk),
+      hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    })
+  } else {
+    // Update existing summon
+    const index = editingSummonIndex.value
+    setData.value.summons[index] = {
+      id, name, cost: Number(cost), move: Number(move), atk: Number(atk),
+      hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    }
+  }
+  
+  notification.success(isEditingSummon.value ? '召唤物已更新！' : '召唤物已添加！')
+  showSummonModal.value = false
+}
+
+function handleDeleteSummon() {
+  const index = editingSummonIndex.value
+  setData.value.summons.splice(index, 1)
+  notification.success('召唤物已删除！')
+  showSummonModal.value = false
+}
+
+// Handler functions for saving buildings
+function handleSaveBuilding() {
+  const { id, name, cost, hp_init, hp_limit, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingBuilding.value
+  
+  if (!id || !name) {
+    notification.error('请填写必填项：卡牌ID和名称')
+    return
+  }
+  
+  // Validate ID for new buildings
+  if (!isEditingBuilding.value) {
+    try {
+      validateId(id, '建筑物ID')
+    } catch (err) {
+      notification.error(err.message)
+      return
+    }
+    
+    if (!setData.value.buildings) setData.value.buildings = []
+    if (setData.value.buildings.some(b => b.id === id)) {
+      notification.error('该建筑物ID已存在！')
+      return
+    }
+    
+    // Add new building
+    setData.value.buildings.push({
+      id, name, cost: Number(cost), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    })
+  } else {
+    // Update existing building
+    const index = editingBuildingIndex.value
+    setData.value.buildings[index] = {
+      id, name, cost: Number(cost), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      rarity, image, icon, brast, text,
+      bound_effects: [...bound_effects],
+      bound_fixed_terms: [...bound_fixed_terms]
+    }
+  }
+  
+  notification.success(isEditingBuilding.value ? '建筑物已更新！' : '建筑物已添加！')
+  showBuildingModal.value = false
+}
+
+function handleDeleteBuilding() {
+  const index = editingBuildingIndex.value
+  setData.value.buildings.splice(index, 1)
+  notification.success('建筑物已删除！')
+  showBuildingModal.value = false
 }
 
 async function saveSet() {
@@ -1563,6 +2137,35 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(245, 87, 108, 0.3);
 }
 
+/* Rarity badge styles */
+.rarity-ssr {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #996515;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4);
+  font-weight: 700;
+}
+
+.rarity-sr {
+  background: linear-gradient(135deg, #9b59b6 0%, #c084fc 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(155, 89, 182, 0.4);
+  font-weight: 700;
+}
+
+.rarity-r {
+  background: linear-gradient(135deg, #3498db 0%, #60a5fa 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.4);
+  font-weight: 700;
+}
+
+.rarity-n {
+  background: linear-gradient(135deg, #95a5a6 0%, #bdc3c7 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(149, 165, 166, 0.4);
+  font-weight: 700;
+}
+
 
 .tree-section {
   margin-bottom: 5px;
@@ -1657,9 +2260,13 @@ onMounted(() => {
 /* Form Row - for horizontal layout */
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
 }
 
 /* Hint text */
