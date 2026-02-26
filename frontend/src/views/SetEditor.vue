@@ -64,9 +64,7 @@
                 :class="{ active: activeTab === 'attacks' && selectedItem.id === attack.id }"
                 @click="selectItem('attacks', attack.id)"
               >
-                <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span :class="['badge', getRarityBadgeClass(attack.rarity)]">{{ attack.rarity }}</span>
                   {{ attack.name }}
                 </span>
               </div>
@@ -91,9 +89,7 @@
                 :class="{ active: activeTab === 'strategies' && selectedItem.id === strategy.id }"
                 @click="selectItem('strategies', strategy.id)"
               >
-                <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span :class="['badge', getRarityBadgeClass(strategy.rarity)]">{{ strategy.rarity }}</span>
                   {{ strategy.name }}
                 </span>
               </div>
@@ -118,9 +114,7 @@
                 :class="{ active: activeTab === 'summons' && selectedItem.id === summon.id }"
                 @click="selectItem('summons', summon.id)"
               >
-                <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span :class="['badge', getRarityBadgeClass(summon.rarity)]">{{ summon.rarity }}</span>
                   {{ summon.name }}
                 </span>
               </div>
@@ -145,9 +139,7 @@
                 :class="{ active: activeTab === 'buildings' && selectedItem.id === building.id }"
                 @click="selectItem('buildings', building.id)"
               >
-                <span class="tree-icon">◆</span>
                 <span class="tree-text">
-                  <span :class="['badge', getRarityBadgeClass(building.rarity)]">{{ building.rarity }}</span>
                   {{ building.name }}
                 </span>
               </div>
