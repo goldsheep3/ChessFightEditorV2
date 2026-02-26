@@ -796,23 +796,25 @@
           @keyup.enter="handleSaveAttack"
         >
       </div>
-      <div class="form-group">
-        <label>费用</label>
-        <input 
-          v-model.number="editingAttack.cost" 
-          type="number" 
-          min="0"
-          placeholder="费用"
-        >
-      </div>
-      <div class="form-group">
-        <label>稀有度</label>
-        <select v-model="editingAttack.rarity">
-          <option value="N">N (灰色)</option>
-          <option value="R">R (蓝色)</option>
-          <option value="SR">SR (紫色)</option>
-          <option value="SSR">SSR (金色)</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingAttack.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingAttack.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
         <label>描述</label>
@@ -860,23 +862,25 @@
           @keyup.enter="handleSaveStrategy"
         >
       </div>
-      <div class="form-group">
-        <label>费用</label>
-        <input 
-          v-model.number="editingStrategy.cost" 
-          type="number" 
-          min="0"
-          placeholder="费用"
-        >
-      </div>
-      <div class="form-group">
-        <label>稀有度</label>
-        <select v-model="editingStrategy.rarity">
-          <option value="N">N (灰色)</option>
-          <option value="R">R (蓝色)</option>
-          <option value="SR">SR (紫色)</option>
-          <option value="SSR">SSR (金色)</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingStrategy.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingStrategy.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
         <label>描述</label>
@@ -924,59 +928,65 @@
           @keyup.enter="handleSaveSummon"
         >
       </div>
-      <div class="form-group">
-        <label>费用</label>
-        <input 
-          v-model.number="editingSummon.cost" 
-          type="number" 
-          min="0"
-          placeholder="费用"
-        >
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingSummon.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>移动</label>
+          <input 
+            v-model.number="editingSummon.move" 
+            type="number" 
+            min="0"
+            placeholder="移动"
+          >
+        </div>
       </div>
-      <div class="form-group">
-        <label>移动</label>
-        <input 
-          v-model.number="editingSummon.move" 
-          type="number" 
-          min="0"
-          placeholder="移动"
-        >
+      <div class="form-row">
+        <div class="form-group">
+          <label>攻击</label>
+          <input 
+            v-model.number="editingSummon.atk" 
+            type="number" 
+            min="0"
+            placeholder="攻击"
+          >
+        </div>
+        <div class="form-group">
+          <label>初始HP</label>
+          <input 
+            v-model.number="editingSummon.hp_init" 
+            type="number" 
+            min="1"
+            placeholder="初始HP"
+          >
+        </div>
       </div>
-      <div class="form-group">
-        <label>攻击</label>
-        <input 
-          v-model.number="editingSummon.atk" 
-          type="number" 
-          min="0"
-          placeholder="攻击"
-        >
-      </div>
-      <div class="form-group">
-        <label>初始HP</label>
-        <input 
-          v-model.number="editingSummon.hp_init" 
-          type="number" 
-          min="1"
-          placeholder="初始HP"
-        >
-      </div>
-      <div class="form-group">
-        <label>最大HP</label>
-        <input 
-          v-model.number="editingSummon.hp_limit" 
-          type="number" 
-          min="1"
-          placeholder="最大HP"
-        >
-      </div>
-      <div class="form-group">
-        <label>稀有度</label>
-        <select v-model="editingSummon.rarity">
-          <option value="N">N (灰色)</option>
-          <option value="R">R (蓝色)</option>
-          <option value="SR">SR (紫色)</option>
-          <option value="SSR">SSR (金色)</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>最大HP</label>
+          <input 
+            v-model.number="editingSummon.hp_limit" 
+            type="number" 
+            min="1"
+            placeholder="最大HP"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingSummon.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
         <label>描述</label>
@@ -1024,41 +1034,45 @@
           @keyup.enter="handleSaveBuilding"
         >
       </div>
-      <div class="form-group">
-        <label>费用</label>
-        <input 
-          v-model.number="editingBuilding.cost" 
-          type="number" 
-          min="0"
-          placeholder="费用"
-        >
+      <div class="form-row">
+        <div class="form-group">
+          <label>费用</label>
+          <input 
+            v-model.number="editingBuilding.cost" 
+            type="number" 
+            min="0"
+            placeholder="费用"
+          >
+        </div>
+        <div class="form-group">
+          <label>初始HP</label>
+          <input 
+            v-model.number="editingBuilding.hp_init" 
+            type="number" 
+            min="1"
+            placeholder="初始HP"
+          >
+        </div>
       </div>
-      <div class="form-group">
-        <label>初始HP</label>
-        <input 
-          v-model.number="editingBuilding.hp_init" 
-          type="number" 
-          min="1"
-          placeholder="初始HP"
-        >
-      </div>
-      <div class="form-group">
-        <label>最大HP</label>
-        <input 
-          v-model.number="editingBuilding.hp_limit" 
-          type="number" 
-          min="1"
-          placeholder="最大HP"
-        >
-      </div>
-      <div class="form-group">
-        <label>稀有度</label>
-        <select v-model="editingBuilding.rarity">
-          <option value="N">N (灰色)</option>
-          <option value="R">R (蓝色)</option>
-          <option value="SR">SR (紫色)</option>
-          <option value="SSR">SSR (金色)</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>最大HP</label>
+          <input 
+            v-model.number="editingBuilding.hp_limit" 
+            type="number" 
+            min="1"
+            placeholder="最大HP"
+          >
+        </div>
+        <div class="form-group">
+          <label>稀有度</label>
+          <select v-model="editingBuilding.rarity">
+            <option value="N">N (灰色)</option>
+            <option value="R">R (蓝色)</option>
+            <option value="SR">SR (紫色)</option>
+            <option value="SSR">SSR (金色)</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
         <label>描述</label>
@@ -2256,9 +2270,13 @@ onMounted(() => {
 /* Form Row - for horizontal layout */
 .form-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
 }
 
 /* Hint text */
