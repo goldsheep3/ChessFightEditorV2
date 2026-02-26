@@ -37,7 +37,6 @@
                   :class="{ active: activeTab === 'forms' && selectedItem.id === form.id }"
                   @click="selectForm(form.id)"
                 >
-                  <span class="tree-icon">◆</span>
                   <span class="tree-text">
                     {{ form.name }}
                   </span>
@@ -435,30 +434,24 @@
                   
                   <div class="form-group">
                     <label>绑定效果 (多个用逗号分隔):</label>
-                    <div class="input-with-button">
-                      <input 
-                        type="text" 
-                        :value="(stage.bound_effects || []).join(', ')"
-                        @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                        placeholder="例如: effect1, effect2"
-                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
-                      >
-                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
-                    </div>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_effects || []).join(', ')"
+                      @input="stage.bound_effects = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: effect1, effect2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_effects') }"
+                    >
                   </div>
                   
                   <div class="form-group">
                     <label>绑定固词 (多个用逗号分隔):</label>
-                    <div class="input-with-button">
-                      <input 
-                        type="text" 
-                        :value="(stage.bound_fixed_terms || []).join(', ')"
-                        @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
-                        placeholder="例如: term1, term2"
-                        :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
-                      >
-                      <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄</button>
-                    </div>
+                    <input 
+                      type="text" 
+                      :value="(stage.bound_fixed_terms || []).join(', ')"
+                      @input="stage.bound_fixed_terms = $event.target.value.split(',').map(s => s.trim()).filter(Boolean)"
+                      placeholder="例如: term1, term2"
+                      :class="{ modified: isStageFieldModified(form.id, stage.stage, 'bound_fixed_terms') }"
+                    >
                   </div>
                 </div>
               </template>
@@ -608,10 +601,13 @@
         </div>
         
         <div class="effects-display-section">
-          <h3>绑定效果/固词验证</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>绑定效果/固词验证</h3>
+            <button class="refresh-btn" @click="refreshBoundItemsValidation" title="刷新验证">🔄 刷新</button>
+          </div>
           <div class="effects-list">
             <div v-if="boundItemsValidation.effects.length === 0 && boundItemsValidation.terms.length === 0" class="hint">
-              点击"🔄"按钮验证绑定的效果和固词
+              点击"🔄 刷新"按钮验证绑定的效果和固词
             </div>
             
             <!-- Display bound effects -->
@@ -1350,6 +1346,7 @@ function selectItem(type, id = null, stage = null) {
       saveSet().then(() => {
         activeTab.value = type
         selectedItem.value = { type, id, stage }
+        refreshBoundItemsValidation()
       })
       return
     } else {
@@ -1361,6 +1358,7 @@ function selectItem(type, id = null, stage = null) {
   
   activeTab.value = type
   selectedItem.value = { type, id, stage }
+  refreshBoundItemsValidation()
 }
 
 function selectForm(formId) {
