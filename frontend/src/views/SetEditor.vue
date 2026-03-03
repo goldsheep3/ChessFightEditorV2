@@ -266,7 +266,7 @@
               <div class="card-header">
                 <h4>
                   <span :class="['alignment-badge', `alignment-${effect.alignment}`]">
-                    {{ alignmentTranslation[effect.alignment] || effect.alignment }}
+                    {{ alignmentTranslation(effect.alignment) || effect.alignment }}
                   </span>
                   {{ effect.name }} <span class="id-badge">({{ id }})</span>
                 </h4>
@@ -1094,7 +1094,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI, globalAPI } from '@/utils/api'
-import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
+import { validateId, ALIGNMENT_OPTIONS, getAlignmentTranslation, generateRandomId } from '@/utils/validation'
 import { useNotification } from '@/utils/notification'
 import ModalDialog from '@/components/ModalDialog.vue'
 
@@ -1154,7 +1154,7 @@ const isEditingBuilding = ref(false)
 const editingBuilding = ref({ id: '', name: '', cost: 0, hp_init: 1, hp_limit: 1, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
 const editingBuildingIndex = ref(-1)
 
-const alignmentTranslation = ALIGNMENT_TRANSLATION
+const alignmentTranslation = (alignment) => getAlignmentTranslation(alignment)
 
 const pageTitle = computed(() => {
   return `套组编辑器 - ${setData.value?.name || props.setCode}`
