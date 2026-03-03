@@ -795,6 +795,16 @@
           >
         </div>
         <div class="form-group">
+          <label>攻击力变化</label>
+          <input 
+            v-model.number="editingAttack.atk_delta" 
+            type="number" 
+            placeholder="攻击力变化值"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
           <label>稀有度</label>
           <select v-model="editingAttack.rarity">
             <option value="N">N (灰色)</option>
@@ -1123,7 +1133,7 @@ const originalTermId = ref('')
 // Modal state for attack cards
 const showAttackModal = ref(false)
 const isEditingAttack = ref(false)
-const editingAttack = ref({ id: '', name: '', cost: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingAttack = ref({ id: '', name: '', cost: 0, atk_delta: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
 const editingAttackIndex = ref(-1)
 
 // Modal state for strategy cards
@@ -1648,6 +1658,7 @@ function addAttack() {
     id: '',
     name: '',
     cost: 0,
+    atk_delta: 0,
     rarity: 'R',
     image: '',
     icon: '',
@@ -1723,7 +1734,7 @@ function openEditStrategyModal(index) {
 
 // Handler functions for saving attacks
 function handleSaveAttack() {
-  const { id, name, cost, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingAttack.value
+  const { id, name, cost, atk_delta, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingAttack.value
   
   if (!id || !name) {
     notification.error('请填写必填项：卡牌ID和名称')
@@ -1747,7 +1758,7 @@ function handleSaveAttack() {
     
     // Add new attack
     setData.value.attacks.push({
-      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      id, name, cost: Number(cost), atk_delta: Number(atk_delta), rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
     })
@@ -1755,7 +1766,7 @@ function handleSaveAttack() {
     // Update existing attack
     const index = editingAttackIndex.value
     setData.value.attacks[index] = {
-      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      id, name, cost: Number(cost), atk_delta: Number(atk_delta), rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
     }
