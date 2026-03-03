@@ -1,19 +1,27 @@
 // i18n utility for loading and using translations
 import { ref } from 'vue'
+import zhCNYaml from '../locales/zh-CN.yaml?raw'
 
 const currentLocale = ref('zh-CN')
 const translations = ref({})
 let isInitialized = false
 
+// Locale files
+const localeFiles = {
+  'zh-CN': zhCNYaml
+}
+
 /**
- * Load translations from YAML file
+ * Load translations from YAML content
  * @param {string} locale - Locale code (e.g., 'zh-CN')
  * @returns {Promise<Object>} Translation data
  */
 async function loadTranslations(locale) {
   try {
-    const response = await fetch(`/src/locales/${locale}.yaml`)
-    const yamlText = await response.text()
+    const yamlText = localeFiles[locale]
+    if (!yamlText) {
+      throw new Error(`Locale ${locale} not found`)
+    }
     
     // Import js-yaml dynamically
     const jsyaml = await import('js-yaml')

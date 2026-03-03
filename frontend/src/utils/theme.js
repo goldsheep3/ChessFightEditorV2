@@ -1,8 +1,16 @@
 // Theme management utility
 import { ref, watch } from 'vue'
+import defaultThemeYaml from '../themes/default.yaml?raw'
+import darkThemeYaml from '../themes/dark.yaml?raw'
 
 const currentTheme = ref('default')
 const themeData = ref(null)
+
+// Available themes with their YAML content
+const themeFiles = {
+  'default': defaultThemeYaml,
+  'dark': darkThemeYaml
+}
 
 // Available themes
 const availableThemes = [
@@ -11,14 +19,16 @@ const availableThemes = [
 ]
 
 /**
- * Load a theme from YAML file
+ * Load a theme from YAML content
  * @param {string} themeName - The theme name (e.g., 'default', 'dark')
  * @returns {Promise<Object>} Theme data
  */
 async function loadTheme(themeName) {
   try {
-    const response = await fetch(`/src/themes/${themeName}.yaml`)
-    const yamlText = await response.text()
+    const yamlText = themeFiles[themeName]
+    if (!yamlText) {
+      throw new Error(`Theme ${themeName} not found`)
+    }
     
     // Import js-yaml dynamically
     const jsyaml = await import('js-yaml')
