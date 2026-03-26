@@ -1,0 +1,97 @@
+# Dark Theme Configuration
+name: "暗色主题"
+description: "ChessFight Editor 暗色配色方案"
+
+# Primary Colors
+primary:
+  main: "#8b5cf6"
+  light: "#a78bfa"
+  dark: "#6d28d9"
+  gradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)"
+
+# Secondary Colors
+secondary:
+  blue: "#3b82f6"
+  blue_dark: "#2563eb"
+  green: "#10b981"
+  green_dark: "#059669"
+  green_light: "#34d399"
+  green_success: "#22c55e"
+  red: "#ef4444"
+  red_dark: "#dc2626"
+
+# Text Colors
+text:
+  primary: "#e5e7eb"
+  secondary: "#d1d5db"
+  tertiary: "#9ca3af"
+  muted: "#6b7280"
+  heading: "#f3f4f6"
+  subheading: "#e5e7eb"
+  gray: "#9ca3af"
+  gray_light: "#6b7280"
+
+# Background Colors
+background:
+  body: "#111827"
+  container: "#1f2937"
+  section: "#374151"
+  panel: "#1f2937"
+  hover: "#374151"
+  light: "#1f2937"
+  readonly: "#374151"
+
+# Border Colors
+border:
+  default: "#4b5563"
+  light: "#374151"
+  lighter: "#4b5563"
+  medium: "#6b7280"
+
+# Rarity Badge Colors
+rarity:
+  ssr:
+    gradient: "linear-gradient(135deg, #fbbf24 0%, #fcd34d 100%)"
+    text: "#78350f"
+  sr:
+    gradient: "linear-gradient(135deg, #a855f7 0%, #c084fc 100%)"
+    text: "#e9d5ff"
+  r:
+    gradient: "linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)"
+    text: "#dbeafe"
+  n:
+    gradient: "linear-gradient(135deg, #6b7280 0%, #9ca3af 100%)"
+    text: "#e5e7eb"
+
+# Status Colors
+status:
+  success:
+    bg: "#065f46"
+    text: "#d1fae5"
+    border: "#10b981"
+  warning:
+    bg: "#78350f"
+    bg_alt: "#92400e"
+    text: "#fef3c7"
+    border: "#f59e0b"
+    border_alt: "#fbbf24"
+  error:
+    bg: "#7f1d1d"
+    text: "#fecaca"
+    border: "#ef4444"
+  info:
+    bg: "#1e3a8a"
+    text: "#dbeafe"
+    border: "#3b82f6"
+
+# Button Colors
+button:
+  primary: "#10b981"
+  primary_hover: "#059669"
+  secondary: "#8b5cf6"
+  danger: "#ef4444"
+  danger_hover: "#dc2626"
+
+# Special Colors
+special:
+  pink_gradient: "linear-gradient(135deg, #ec4899 0%, #ef4444 100%)"

@@ -5,6 +5,7 @@
       <div class="logo">🎮</div>
       <h1 class="page-title">ChessFight 套组编辑器 V2</h1>
       <div class="spacer"></div>
+      <ThemeSwitcher />
     </div>
 
     <div class="main-content">
@@ -315,6 +316,7 @@ import { setAPI, globalAPI } from '@/utils/api'
 import { validateSetCode, validateId } from '@/utils/validation'
 import { useNotification } from '@/utils/notification'
 import ModalDialog from '@/components/ModalDialog.vue'
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 const router = useRouter()
 const notification = useNotification()

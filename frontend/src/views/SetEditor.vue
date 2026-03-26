@@ -266,7 +266,7 @@
               <div class="card-header">
                 <h4>
                   <span :class="['alignment-badge', `alignment-${effect.alignment}`]">
-                    {{ alignmentTranslation[effect.alignment] || effect.alignment }}
+                    {{ alignmentTranslation(effect.alignment) || effect.alignment }}
                   </span>
                   {{ effect.name }} <span class="id-badge">({{ id }})</span>
                 </h4>
@@ -795,6 +795,16 @@
           >
         </div>
         <div class="form-group">
+          <label>攻击力变化</label>
+          <input 
+            v-model.number="editingAttack.atk_delta" 
+            type="number" 
+            placeholder="攻击力变化值"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
           <label>稀有度</label>
           <select v-model="editingAttack.rarity">
             <option value="N">N (灰色)</option>
@@ -1033,6 +1043,36 @@
           >
         </div>
         <div class="form-group">
+          <label>宽度</label>
+          <input 
+            v-model.number="editingBuilding.width" 
+            type="number" 
+            min="1"
+            placeholder="宽度"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>高度</label>
+          <input 
+            v-model.number="editingBuilding.height" 
+            type="number" 
+            min="1"
+            placeholder="高度"
+          >
+        </div>
+        <div class="form-group">
+          <label>攻击</label>
+          <input 
+            v-model.number="editingBuilding.atk" 
+            type="number" 
+            placeholder="攻击"
+          >
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
           <label>初始HP</label>
           <input 
             v-model.number="editingBuilding.hp_init" 
@@ -1041,8 +1081,6 @@
             placeholder="初始HP"
           >
         </div>
-      </div>
-      <div class="form-row">
         <div class="form-group">
           <label>最大HP</label>
           <input 
@@ -1052,6 +1090,8 @@
             placeholder="最大HP"
           >
         </div>
+      </div>
+      <div class="form-row">
         <div class="form-group">
           <label>稀有度</label>
           <select v-model="editingBuilding.rarity">
@@ -1084,7 +1124,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { setAPI, globalAPI } from '@/utils/api'
-import { validateId, ALIGNMENT_OPTIONS, ALIGNMENT_TRANSLATION, generateRandomId } from '@/utils/validation'
+import { validateId, ALIGNMENT_OPTIONS, getAlignmentTranslation, generateRandomId } from '@/utils/validation'
 import { useNotification } from '@/utils/notification'
 import ModalDialog from '@/components/ModalDialog.vue'
 
@@ -1123,7 +1163,7 @@ const originalTermId = ref('')
 // Modal state for attack cards
 const showAttackModal = ref(false)
 const isEditingAttack = ref(false)
-const editingAttack = ref({ id: '', name: '', cost: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingAttack = ref({ id: '', name: '', cost: 0, atk_delta: 0, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
 const editingAttackIndex = ref(-1)
 
 // Modal state for strategy cards
@@ -1141,10 +1181,10 @@ const editingSummonIndex = ref(-1)
 // Modal state for building cards
 const showBuildingModal = ref(false)
 const isEditingBuilding = ref(false)
-const editingBuilding = ref({ id: '', name: '', cost: 0, hp_init: 1, hp_limit: 1, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
+const editingBuilding = ref({ id: '', name: '', cost: 0, width: 1, height: 1, atk: 0, hp_init: 1, hp_limit: 1, rarity: 'R', image: '', icon: '', brast: '', text: '', bound_effects: [], bound_fixed_terms: [] })
 const editingBuildingIndex = ref(-1)
 
-const alignmentTranslation = ALIGNMENT_TRANSLATION
+const alignmentTranslation = (alignment) => getAlignmentTranslation(alignment)
 
 const pageTitle = computed(() => {
   return `套组编辑器 - ${setData.value?.name || props.setCode}`
@@ -1623,6 +1663,9 @@ function addBuilding() {
     id: '',
     name: '',
     cost: 0,
+    width: 1,
+    height: 1,
+    atk: 0,
     hp_init: 1,
     hp_limit: 1,
     rarity: 'R',
@@ -1648,6 +1691,7 @@ function addAttack() {
     id: '',
     name: '',
     cost: 0,
+    atk_delta: 0,
     rarity: 'R',
     image: '',
     icon: '',
@@ -1723,7 +1767,7 @@ function openEditStrategyModal(index) {
 
 // Handler functions for saving attacks
 function handleSaveAttack() {
-  const { id, name, cost, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingAttack.value
+  const { id, name, cost, atk_delta, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingAttack.value
   
   if (!id || !name) {
     notification.error('请填写必填项：卡牌ID和名称')
@@ -1747,7 +1791,7 @@ function handleSaveAttack() {
     
     // Add new attack
     setData.value.attacks.push({
-      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      id, name, cost: Number(cost), atk_delta: Number(atk_delta), rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
     })
@@ -1755,7 +1799,7 @@ function handleSaveAttack() {
     // Update existing attack
     const index = editingAttackIndex.value
     setData.value.attacks[index] = {
-      id, name, cost: Number(cost), rarity, image, icon, brast, text,
+      id, name, cost: Number(cost), atk_delta: Number(atk_delta), rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
     }
@@ -1880,7 +1924,7 @@ function handleDeleteSummon() {
 
 // Handler functions for saving buildings
 function handleSaveBuilding() {
-  const { id, name, cost, hp_init, hp_limit, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingBuilding.value
+  const { id, name, cost, width, height, atk, hp_init, hp_limit, rarity, image, icon, brast, text, bound_effects, bound_fixed_terms } = editingBuilding.value
   
   if (!id || !name) {
     notification.error('请填写必填项：卡牌ID和名称')
@@ -1904,7 +1948,8 @@ function handleSaveBuilding() {
     
     // Add new building
     setData.value.buildings.push({
-      id, name, cost: Number(cost), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      id, name, cost: Number(cost), width: Number(width), height: Number(height), 
+      atk: Number(atk), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
       rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
@@ -1913,13 +1958,14 @@ function handleSaveBuilding() {
     // Update existing building
     const index = editingBuildingIndex.value
     setData.value.buildings[index] = {
-      id, name, cost: Number(cost), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
+      id, name, cost: Number(cost), width: Number(width), height: Number(height),
+      atk: Number(atk), hp_init: Number(hp_init), hp_limit: Number(hp_limit),
       rarity, image, icon, brast, text,
       bound_effects: [...bound_effects],
       bound_fixed_terms: [...bound_fixed_terms]
     }
   }
-  
+
   notification.success(isEditingBuilding.value ? '建筑物已更新！' : '建筑物已添加！')
   showBuildingModal.value = false
 }

@@ -1,4 +1,5 @@
 // Shared validation patterns and constants
+import { t } from './i18n.js'
 
 // Pattern for entity IDs (forms, effects, terms, etc.)
 export const ID_PATTERN = /^[a-z0-9][a-z0-9\-_]*$/
@@ -12,24 +13,22 @@ export const ALIGNMENT_OPTIONS = ['positive', 'neutral', 'negative']
 // Rarity options for cards
 export const RARITY_OPTIONS = ['R', 'SR', 'SSR']
 
-// Translation map for effect alignment
-export const ALIGNMENT_TRANSLATION = {
-  'positive': '正面',
-  'neutral': '中性',
-  'negative': '负面'
+// Translation map for effect alignment (using i18n)
+export function getAlignmentTranslation(alignment) {
+  return t(`alignment.${alignment}`)
 }
 
 // Validation helper functions
 export function validateId(id, fieldName = 'ID') {
   if (!ID_PATTERN.test(id)) {
-    throw new Error(`${fieldName}格式无效！必须以小写字母或数字开头，只能包含小写字母、数字、下划线和短横线。`)
+    throw new Error(`${fieldName}${t('validation.id_format_invalid')}`)
   }
   return true
 }
 
 export function validateSetCode(code) {
   if (!SET_CODE_PATTERN.test(code)) {
-    throw new Error('套组代码格式无效！必须以字母或数字开头，只能包含字母、数字、下划线和短横线。')
+    throw new Error(t('validation.set_code_format_invalid'))
   }
   return true
 }

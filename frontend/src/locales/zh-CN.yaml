@@ -1,0 +1,215 @@
+# Chinese (Simplified) Translations
+locale: zh-CN
+name: 简体中文
+
+# Application
+app:
+  title: ChessFight 套组编辑器 V2
+  subtitle: 套组编辑器
+
+# Common
+common:
+  back: 返回
+  save: 保存
+  edit: 编辑
+  delete: 删除
+  cancel: 取消
+  confirm: 确定
+  close: 关闭
+  add: 添加
+  create: 创建
+  update: 更新
+  search: 搜索
+  filter: 筛选
+  reset: 重置
+  loading: 加载中...
+  yes: 是
+  no: 否
+
+# Navigation
+nav:
+  main_menu: 主菜单
+  home: 首页
+  back_to_home: 返回首页
+  set_management: 套组管理
+  global_effects: 全局效果库
+  global_fixed_terms: 全局固词库
+  image_manager: 图片管理器
+
+# Buttons
+btn:
+  back: 返回
+  save: 保存
+  create_set: 创建新套组
+  add_effect: 添加效果
+  add_fixed_term: 添加固词
+  add_form: 新建形态卡
+  add_attack: 新建攻击卡
+  add_strategy: 新建策略卡
+  add_summon: 新建召唤卡
+  add_building: 新建建筑物卡
+  upload_image: 上传图片
+  delete_confirm: 删除
+
+# Form Labels
+form:
+  set_code: 套组代码
+  set_name: 套组名称
+  name: 名称
+  description: 描述
+  notes: 备注
+  effect_id: 效果ID
+  effect_name: 效果名称
+  alignment: 性质
+  fixed_term_id: 固词ID
+  fixed_term_name: 固词名称
+  prototype: 原型
+  designer: 设计师
+  form_id: 形态ID
+  form_name: 形态名称
+  rarity: 稀有度
+  card_id: 卡牌ID
+  card_name: 卡牌名称
+  cost: 费用
+  atk_delta: 攻击力变化
+  move: 移动
+  attack: 攻击
+  hp_init: 初始HP
+  hp_limit: 最大HP
+  width: 宽度
+  height: 高度
+  stage: 阶段
+  text: 描述
+
+# Headings
+heading:
+  basic_info: 基本信息
+  design_info: 设计信息
+  local_effects: 局部效果库
+  local_fixed_terms: 局部固词库
+  forms: 形态卡
+  attacks: 攻击卡
+  strategies: 策略卡
+  summons: 召唤卡
+  buildings: 建筑物卡
+  effects_list: 全局效果列表
+  fixed_terms_list: 全局固词列表
+  set_management: 套组管理
+
+# Alignment Types
+alignment:
+  positive: 正面
+  neutral: 中性
+  negative: 负面
+
+# Rarity Types
+rarity:
+  n: N (灰色)
+  r: R (蓝色)
+  sr: SR (紫色)
+  ssr: SSR (金色)
+
+# Hints/Placeholders
+hint:
+  lowercase_id: 小写字母、数字、下划线
+  id_immutable: ID创建后不可修改
+  effect_name: 效果名称
+  effect_notes_optional: 效果备注（可选）
+  fixed_term_name: 固词名称
+  fixed_term_notes_optional: 固词备注（可选）
+  card_name: 卡牌名称
+  card_description: 卡牌描述
+  set_code_format: 字母、数字、下划线、短横线
+  set_name: 套组名称
+  set_description: 套组描述
+
+# Validation Messages
+validation:
+  required_fields: 请填写必填项
+  id_format_invalid: 格式无效！必须以小写字母或数字开头，只能包含小写字母、数字、下划线和短横线。
+  set_code_format_invalid: 套组代码格式无效！必须以字母或数字开头，只能包含字母、数字、下划线和短横线。
+  id_exists: ID已存在！
+  effect_id_exists: 该效果ID已存在！
+  fixed_term_id_exists: 该固词ID已存在！
+  attack_id_exists: 该攻击ID已存在！
+  strategy_id_exists: 该策略ID已存在！
+  required_effect_id_name: 请填写必填项：效果ID和名称
+  required_fixed_term_id_name: 请填写必填项：固词ID和名称
+  required_card_id_name: 请填写必填项：卡牌ID和名称
+  confirm_delete: 确定要删除吗？
+  confirm_delete_effect: 确定要删除此效果吗？
+  confirm_delete_fixed_term: 确定要删除此固词吗？
+  confirm_delete_attack: 确定要删除此攻击吗？
+  confirm_delete_strategy: 确定要删除此策略吗？
+  confirm_delete_form: 确定要删除此形态吗？
+  confirm_delete_summon: 确定要删除此召唤卡吗？
+  confirm_delete_building: 确定要删除此建筑物吗？
+
+# Success Messages
+success:
+  saved: 保存成功！
+  effect_updated: 效果已更新！
+  effect_added: 效果已添加！
+  effect_deleted: 效果已删除！
+  fixed_term_updated: 固词已更新！
+  fixed_term_added: 固词已添加！
+  fixed_term_deleted: 固词已删除！
+  attack_updated: 攻击已更新！
+  attack_added: 攻击已添加！
+  strategy_updated: 策略已更新！
+  strategy_added: 策略已添加！
+  form_updated: 形态已更新！
+  form_added: 形态已添加！
+  summon_updated: 召唤卡已更新！
+  summon_added: 召唤卡已添加！
+  building_updated: 建筑物已更新！
+  building_added: 建筑物已添加！
+
+# Error Messages
+error:
+  load_failed: 加载失败
+  save_failed: 保存失败
+  load_global_effects_failed: 加载全局效果库失败
+  load_global_fixed_terms_failed: 加载全局固词库失败
+  operation_failed: 操作失败
+
+# Empty States
+empty:
+  no_sets: 暂无套组，请创建一个新套组
+  no_effects: 暂无效果
+  no_global_effects: 暂无全局效果
+  no_fixed_terms: 暂无固词
+  no_global_fixed_terms: 暂无全局固词
+  no_local_effects: 暂无局部效果
+  no_local_fixed_terms: 暂无局部固词
+  no_forms: 暂无形态卡
+  no_attacks: 暂无攻击卡
+  no_strategies: 暂无策略卡
+
+# Statistics
+stats:
+  total_effects: 效果总数
+  total_fixed_terms: 固词总数
+  total_sets: 套组总数
+
+# Modal Titles
+modal:
+  edit_effect: 编辑效果
+  add_effect: 添加效果
+  edit_fixed_term: 编辑固词
+  add_fixed_term: 添加固词
+  edit_form: 编辑形态卡
+  add_form: 添加形态卡
+  edit_attack: 编辑攻击卡
+  add_attack: 添加攻击卡
+  edit_strategy: 编辑策略卡
+  add_strategy: 添加策略卡
+  edit_summon: 编辑召唤卡
+  add_summon: 添加召唤卡
+  edit_building: 编辑建筑物卡
+  add_building: 添加建筑物卡
+
+# Help Text
+help:
+  global_effects_info: 全局效果库用于存储可在多个套组间共享的效果定义。
+  global_fixed_terms_info: 全局固词库用于存储可在多个套组间共享的固定词汇定义。
